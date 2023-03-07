@@ -11,6 +11,7 @@ AstNode -> Result<AstNode, ()>:
         })
       }
     | Term { $1 }
+    | "PRINT" Term { Ok(AstNode::Print{ rhs: Box::new($2?) }) }
     ;
 
 Term -> Result<AstNode, ()>:
@@ -39,6 +40,8 @@ Factor -> Result<AstNode, ()>:
       }
     ;
 
+
+// Print -> Result<AstNode, ():    "PRINT" { Ok(AstNode::Print{  rhs: Box::new($2?) }) };
 Unmatched -> ():
       "UNMATCHED" { };
 %%

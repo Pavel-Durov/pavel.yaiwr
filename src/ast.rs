@@ -11,4 +11,7 @@ pub enum AstNode {
     Number {
         value: u64,
     },
+    Print {
+        rhs: Box<AstNode>,
+    }
 }

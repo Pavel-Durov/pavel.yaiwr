@@ -28,6 +28,7 @@ fn main() {
 
 fn eval_print(input: &str) {
     let ast = Calc::from_str(input);
+    dbg!("AST: {}", &ast);
     match ast {
         Ok(ast_node) => {
             let bytecode = &mut vec![];

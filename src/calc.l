@@ -4,5 +4,6 @@
 \* "*"
 \( "("
 \) ")"
+print "PRINT" 
 [\t ]+ ;
 . "UNMATCHED"

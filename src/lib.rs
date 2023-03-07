@@ -48,6 +48,7 @@ impl Calc {
                 .checked_mul(Self::eval_exp(*rhs)?)
                 .ok_or("overflowed".to_string()),
             AstNode::Number { value } => Ok(value),
+            AstNode::Print { rhs } => Ok(666)
         }
     }
 
@@ -75,6 +76,7 @@ impl Calc {
                 prog.push(Instruction::Mul {})
             }
             AstNode::Number { value } => prog.push(Instruction::Push { value: value }),
+            AstNode::Print { rhs } => {}
         }
     }
 
