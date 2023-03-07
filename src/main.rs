@@ -41,13 +41,11 @@ fn eval_print(input: &str) {
                 Ok(i) => println!("Result: {}", i),
                 Err(msg) => {
                     error!("Evaluation error: {}", msg);
-                    eprintln!("Evaluation error: {}", msg);
                 }
             }
         }
         Err(msg) => {
             error!("Evaluation error: {}", msg);
-            eprintln!("Evaluation error: {}", msg);
         }
     }
 }
