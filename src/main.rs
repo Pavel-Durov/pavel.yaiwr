@@ -1,4 +1,4 @@
-use log::{debug, error};
+use log::{debug};
 use std::{
     env,
     io::{self, stdout, BufRead, Write},
@@ -40,12 +40,20 @@ fn eval_print(input: &str) {
             match Calc::eval(bytecode) {
                 Ok(i) => println!("Result: {}", i),
                 Err(msg) => {
+<<<<<<< HEAD
                     error!("Evaluation error: {}", msg);
+=======
+                    eprintln!("Evaluation error: {}", msg);
+>>>>>>> logger-env-config
                 }
             }
         }
         Err(msg) => {
+<<<<<<< HEAD
             error!("Evaluation error: {}", msg);
+=======
+            eprintln!("Evaluation error: {}", msg);
+>>>>>>> logger-env-config
         }
     }
 }
