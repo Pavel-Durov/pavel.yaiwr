@@ -23,6 +23,15 @@ $ cargo run -- 2+2+3
 Result: 7
 ```
 
+### Logs
+
+Log levels can be configured via the environment variable: RUST_LOG.
+```shell
+RUST_LOG=info cargo run -- '2+2'
+RUST_LOG=debug cargo run -- '2+2'
+RUST_LOG=error  cargo run -- '2+?'
+```
+
 ## Tests
 
 ```shell
