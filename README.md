@@ -31,6 +31,7 @@ RUST_LOG=info cargo run -- '2+2'
 RUST_LOG=debug cargo run -- '2+2'
 RUST_LOG=error  cargo run -- '2+?'
 ```
+env_logger crate [docs](https://docs.rs/env_logger/0.10.0/env_logger/)
 
 ## Tests
 
