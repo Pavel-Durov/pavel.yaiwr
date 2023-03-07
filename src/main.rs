@@ -36,6 +36,7 @@ fn eval_print(input: &str) {
         Ok(ast_node) => {
             let bytecode = &mut vec![];
             Calc::to_bytecode(ast_node, bytecode);
+            debug!("Bytecode: {:?}", &bytecode);
             match Calc::eval(bytecode) {
                 Ok(i) => println!("Result: {}", i),
                 Err(msg) => {
