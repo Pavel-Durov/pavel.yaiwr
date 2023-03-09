@@ -90,7 +90,11 @@ Repl:
 
 [x] Implement print statement
 
+[x] Implement variables
+
 [ ] Propogate all errors to top-level where the error is printed
+
+[ ] Implement functions
 
 [ ] Add support for custom error handling, i.e InterpError
 
