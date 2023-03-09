@@ -26,7 +26,7 @@ Factor -> Result<AstNode, ()>:
       }
     | "ID" { 
        let v = $1.map_err(|_| ())?;
-       Ok(AstNode::String{ value: $lexer.span_str(v.span()).to_string() })
+       Ok(AstNode::ID{ value: $lexer.span_str(v.span()).to_string() })
     }
     ;
 

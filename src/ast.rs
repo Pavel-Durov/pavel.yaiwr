@@ -11,7 +11,7 @@ pub enum AstNode {
     Number {
         value: u64,
     },
-    String {
+    ID {
         value: String,
     },
     PrintLn {

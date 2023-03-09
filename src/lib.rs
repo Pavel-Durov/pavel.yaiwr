@@ -82,13 +82,13 @@ impl Calc {
                 self.to_bytecode(*rhs, prog);
                 prog.push(Instruction::Assign { id })
             }
-            AstNode::String { value: _ } => {}
+            AstNode::ID { value } => prog.push(Instruction::Load { id: value }),
         }
     }
 
     pub fn eval(&mut self, instructions: &Vec<Instruction>) -> Result<Option<u64>, String> {
-        for a in instructions {
-            match a {
+        for instruction in instructions {
+            match instruction {
                 Instruction::Push { value } => self.stack.push(*value),
                 Instruction::PrintLn {} => {
                     println!("{}", self.stack.pop().expect("cannot pop from empty stack"))
@@ -114,6 +114,12 @@ impl Calc {
                 Instruction::Assign { id } => {
                     let result = self.stack.pop().expect("cannot pop from empty stack");
                     self.var_store.insert(id.to_string(), result);
+                }
+                Instruction::Load { id } => {
+                    let value = self
+                        .get_var(id.into())
+                        .expect(format!("cannot find variable by id - '{}'", id).as_str());
+                    self.stack.push(*value)
                 }
             }
         }

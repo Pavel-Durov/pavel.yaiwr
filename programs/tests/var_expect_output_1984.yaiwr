@@ -1,0 +1,5 @@
+let _a = 1000;
+let _b = 900;
+let _c = 80;
+let _d = 4;
+println(_a + _b + _c + _d);

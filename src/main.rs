@@ -9,29 +9,30 @@ fn main() {
     env_logger::init();
     let args: Vec<String> = env::args().collect();
     debug!("cli args {:?}", &args[1..]);
+    let calc = &mut Calc::new();
     if args.len() > 1 {
         if args[1].ends_with(".yaiwr") {
-            run_from_file(&args[1])
+            run_from_file(&args[1], calc)
         } else {
-            eval_line(&args[1]);
+            eval_line(&args[1], calc);
         }
     } else {
-        repl();
+        repl(calc);
     }
 }
 
-fn run_from_file(file_name: &str) {
+pub fn run_from_file(file_name: &str, calc: &mut Calc) {
     let contents = fs::read_to_string(file_name).expect("Should have been able to read the file");
     let lines: Vec<&str> = contents
         .split("\n")
         .filter(|line| !line.trim().is_empty())
         .collect();
     for line in lines {
-        eval_line(line);
+        eval_line(line, calc);
     }
 }
 
-fn repl() {
+fn repl(calc: &mut Calc) {
     let stdin = io::stdin();
     loop {
         print!("👉 ");
@@ -41,7 +42,7 @@ fn repl() {
                 if l.trim().is_empty() {
                     continue;
                 }
-                if let Some(value) = eval_line(l) {
+                if let Some(value) = eval_line(l, calc) {
                     println!("{}", value);
                 }
             }
@@ -50,17 +51,16 @@ fn repl() {
     }
 }
 
-fn eval_line(input: &str) -> Option<u64> {
+fn eval_line(input: &str, calc: &mut Calc) -> Option<u64> {
     debug!("input: {:?}", &input);
-    let mut c = Calc::new();
-    let ast = c.from_str(input);
+    let ast = calc.from_str(input);
     match ast {
         Ok(ast_node) => {
             debug!("AST: {:?}", &ast_node);
             let bytecode = &mut vec![];
-            c.to_bytecode(ast_node, bytecode);
+            calc.to_bytecode(ast_node, bytecode);
             debug!("Bytecode: {:?}", &bytecode);
-            match c.eval(bytecode) {
+            match calc.eval(bytecode) {
                 Ok(result) => {
                     return result;
                 }
