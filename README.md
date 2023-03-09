@@ -94,6 +94,8 @@ Repl:
 
 [ ] Propogate all errors to top-level where the error is printed
 
+[ ] Compile variable names to integers
+
 [ ] Implement functions
 
 [ ] Add support for custom error handling, i.e InterpError
