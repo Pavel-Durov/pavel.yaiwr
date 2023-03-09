@@ -19,7 +19,9 @@ $ cargo run
 ### Cli args
 ```shell
 $ cargo run 'println(2+2+3);'
-7
+6
+6
+6
 ```
 
 ### File
