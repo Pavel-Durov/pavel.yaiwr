@@ -51,7 +51,7 @@ $ run_docker_ci_job # optional (--prune)
 
 ### Statements
 
-`println` - Prints to the standard output, with a new line.
+`println` - Prints to the standard output, with a new line
 
 Example:
 
@@ -62,13 +62,19 @@ println(1);
 
 ### Variables
 
-Variables names have to start with "_" and follow up with any alphanumeric sequence.
+Variable names:
+
+1. Variable names have to start with "_"
+2. Variable names can only include alphanumeric and underscore ("_") characters
 
 Example:
 ```
-let _a = (1+2);
-let _a = 1;
+let _someVariable = (1+2);
+let _someVariable3 = 1;
+let _x = 2;
+let _y = 1 * _x;
 ```
+Repl: 
 
 # TODOs
 
