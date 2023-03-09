@@ -23,6 +23,7 @@ impl Calc {
             stack: vec![],
         }
     }
+    
     pub fn get_var(&self, id: String) -> &u64 {
         return self
             .var_store
