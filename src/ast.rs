@@ -11,7 +11,14 @@ pub enum AstNode {
     Number {
         value: u64,
     },
+    String {
+        value: String,
+    },
     PrintLn {
+        rhs: Box<AstNode>,
+    },
+    Assign {
+        id: String,
         rhs: Box<AstNode>,
     },
 }

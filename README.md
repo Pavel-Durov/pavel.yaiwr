@@ -18,7 +18,7 @@ $ cargo run
 
 ### Cli args
 ```shell
-$ cargo run 'println(2+2+3)'
+$ cargo run 'println(2+2+3);'
 7
 ```
 
@@ -46,6 +46,31 @@ $ cargo test
 # run test in a container
 $ run_docker_ci_job # optional (--prune)
 ```
+
+## Langugage Spec(ish)
+
+### Statements
+
+`println` - Prints to the standard output, with a newline.
+
+Example:
+
+```
+println(1+2);
+println(1);
+```
+
+### Variables
+
+Variables names have to start with "_" character and be one letter long :).
+
+Example:
+```
+let _a = (1+2);
+let _a = 1;
+```
+
+
 
 # TODOs
 

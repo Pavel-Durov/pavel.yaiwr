@@ -6,7 +6,8 @@ mod tests {
 
     #[test]
     fn eval_error() {
-        let parsing_err = Calc::from_str("invalid input").err().unwrap();
+        let c = Calc::new();
+        let parsing_err = c.from_str("invalid input").err().unwrap();
         assert_ne!(parsing_err, "")
     }
 }

@@ -3,24 +3,27 @@ mod tests {
     use yaiwr::{instruction::Instruction, Calc};
     #[test]
     fn eval_println_statement_add() {
-        let ast = Calc::from_str("println(2+2)").unwrap();
+        let mut c = Calc::new();
+        let ast = c.from_str("println(2+2);").unwrap();
         let bytecode = &mut vec![];
-        Calc::to_bytecode(ast, bytecode);
-        assert_eq!(Calc::eval(bytecode), Ok(None));
+        c.to_bytecode(ast, bytecode);
+        assert_eq!(c.eval(bytecode), Ok(None));
     }
     #[test]
     fn eval_println_statement_mul() {
-        let ast = Calc::from_str("println(2*2)").unwrap();
+        let mut c = Calc::new();
+        let ast = c.from_str("println(2*2);").unwrap();
         let bytecode = &mut vec![];
-        Calc::to_bytecode(ast, bytecode);
-        assert_eq!(Calc::eval(bytecode), Ok(None));
+        c.to_bytecode(ast, bytecode);
+        assert_eq!(c.eval(bytecode), Ok(None));
     }
 
     #[test]
     fn println_statement_numeric_bytecode() {
-        let ast = Calc::from_str("println(1)").unwrap();
+        let c = Calc::new();
+        let ast = c.from_str("println(1);").unwrap();
         let bytecode = &mut vec![];
-        Calc::to_bytecode(ast, bytecode);
+        c.to_bytecode(ast, bytecode);
         match bytecode.as_slice() {
             [first, second] => {
                 assert_eq!(first, &Instruction::Push { value: 1 });
@@ -32,9 +35,10 @@ mod tests {
 
     #[test]
     fn print_statement_add_bytecode() {
-        let ast = Calc::from_str("println (1+1)").unwrap();
+        let c = Calc::new();
+        let ast = c.from_str("println (1+1);").unwrap();
         let bytecode = &mut vec![];
-        Calc::to_bytecode(ast, bytecode);
+        c.to_bytecode(ast, bytecode);
         match bytecode.as_slice() {
             [c1, c2, c3, c4] => {
                 assert_eq!(c1, &Instruction::Push { value: 1 });
@@ -49,18 +53,20 @@ mod tests {
     #[test]
     #[should_panic]
     fn eval_println_statement_add_parsing_error() {
-        let ast = Calc::from_str("println 2+2").unwrap();
+        let mut c = Calc::new();
+        let ast = c.from_str("println 2+2").unwrap();
         let bytecode = &mut vec![];
-        Calc::to_bytecode(ast, bytecode);
-        assert_eq!(Calc::eval(bytecode), Ok(None));
+        c.to_bytecode(ast, bytecode);
+        assert_eq!(c.eval(bytecode), Ok(None));
     }
     #[test]
     #[should_panic]
     fn eval_println_statement_mul_parsing_error() {
-        let ast = Calc::from_str("println 2*2").unwrap();
+        let mut c = Calc::new();
+        let ast = c.from_str("println 2*2").unwrap();
         let bytecode = &mut vec![];
-        Calc::to_bytecode(ast, bytecode);
-        assert_eq!(Calc::eval(bytecode), Ok(None));
+        c.to_bytecode(ast, bytecode);
+        assert_eq!(c.eval(bytecode), Ok(None));
     }
 
     #[test]
@@ -68,9 +74,9 @@ mod tests {
         use std::process::Command;
         let output = Command::new("cargo")
             .arg("run")
-            .arg("println(2)")
+            .arg("println(2);")
             .output()
-            .expect("comand 'cargo run println(2)' failed");
+            .expect("comand 'cargo run println(2);' failed");
 
         assert_eq!(String::from_utf8_lossy(&output.stdout), "2\n");
     }

@@ -4,4 +4,5 @@ pub enum Instruction {
     Mul,
     Push { value: u64 },
     PrintLn,
+    Assign { id: String },
 }

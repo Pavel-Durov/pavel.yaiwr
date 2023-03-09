@@ -52,14 +52,15 @@ fn repl() {
 
 fn eval_line(input: &str) -> Option<u64> {
     debug!("input: {:?}", &input);
-    let ast = Calc::from_str(input);
+    let mut c = Calc::new();
+    let ast = c.from_str(input);
     match ast {
         Ok(ast_node) => {
             debug!("AST: {:?}", &ast_node);
             let bytecode = &mut vec![];
-            Calc::to_bytecode(ast_node, bytecode);
+            c.to_bytecode(ast_node, bytecode);
             debug!("Bytecode: {:?}", &bytecode);
-            match Calc::eval(bytecode) {
+            match c.eval(bytecode) {
                 Ok(result) => {
                     return result;
                 }

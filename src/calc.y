@@ -6,7 +6,11 @@
 Expr -> Result<AstNode, ()>:
     Expr "ADD" Term { Ok(AstNode::Add{ lhs: Box::new($1?), rhs: Box::new($3?) }) }
     | Term { $1 } 
-    |  "PRINT_LN" "(" Expr ")" { Ok(AstNode::PrintLn{ rhs: Box::new($3?) }) }
+    | "PRINT_LN" "(" Expr ")" ";" { Ok(AstNode::PrintLn{ rhs: Box::new($3?) }) }
+    | "ASSIGN" "ID" "=" Expr ";" { 
+       let v = $2.map_err(|_| ())?;
+       Ok(AstNode::Assign{ id: $lexer.span_str(v.span()).to_string(), rhs: Box::new($4?) }) 
+     }
     ;
 
 Term -> Result<AstNode, ()>:
@@ -17,20 +21,29 @@ Term -> Result<AstNode, ()>:
 Factor -> Result<AstNode, ()>:
     "(" Expr ")" { $2 }
     | "INTEGER" { 
-        match $1.map_err(|err| format!("Parsing Error: {}", err)) {
-            Ok(s) => {
-              let s = $lexer.span_str(s.span());
-              match s.parse::<u64>() {
-                  Ok(n_val) => Ok(AstNode::Number{ value: n_val }),
-                  Err(_) => Err(())
-              }
-            }
-            Err(_) => Err(())
-        }
+        let v = $1.map_err(|_| ())?;
+        parse_int($lexer.span_str(v.span()))
       }
+    | "ID" { 
+       let v = $1.map_err(|_| ())?;
+       Ok(AstNode::String{ value: $lexer.span_str(v.span()).to_string() })
+    }
     ;
+
 
 Unmatched -> ():
       "UNMATCHED" { };
 %%
+
 use crate::ast::AstNode;
+
+
+fn parse_int(s: &str) -> Result<AstNode, ()> {
+    match s.parse::<u64>() {
+        Ok(n_val) => Ok(AstNode::Number{ value: n_val }),
+        Err(_) => {
+            eprintln!("{} cannot be represented as a u64", s);
+            Err(())
+        }
+    }
+}
