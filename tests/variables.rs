@@ -42,7 +42,7 @@ mod tests {
             let bytecode = &mut vec![];
             c.to_bytecode(ast, bytecode);
             c.eval(bytecode).unwrap();
-            assert_eq!(c.get_var(t.key.to_string()), Some(&t.expected_value));
+            assert_eq!(c.get_var(t.key.to_string()), &t.expected_value);
         }
     }
 

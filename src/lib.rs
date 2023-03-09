@@ -23,11 +23,19 @@ impl Calc {
             stack: vec![],
         }
     }
-    pub fn get_var(&self, id: String) -> Option<&u64> {
-        return self.var_store.get(&id);
+    pub fn get_var(&self, id: String) -> &u64 {
+        return self
+            .var_store
+            .get(&id)
+            .expect(format!("cannot find variable by id - '{}'", id).as_str());
     }
-    pub fn pop(&self, id: String) -> Option<&u64> {
-        return self.var_store.get(&id);
+
+    pub fn stack_pop(&mut self) -> u64 {
+        return self.stack.pop().expect("cannot pop from empty stack");
+    }
+
+    pub fn stack_push(&mut self, val: u64) {
+        self.stack.push(val);
     }
 
     pub fn from_str(&self, input: &str) -> Result<AstNode, String> {
@@ -94,32 +102,25 @@ impl Calc {
                     println!("{}", self.stack.pop().expect("cannot pop from empty stack"))
                 }
                 Instruction::Mul {} => {
-                    let result = self
-                        .stack
-                        .pop()
-                        .expect("cannot pop from empty stack")
+                    let val = self
+                        .stack_pop()
                         .checked_mul(self.stack.pop().expect("cannot pop from empty stack"))
                         .ok_or("overflowed".to_string())?;
-                    self.stack.push(result)
+                    self.stack_push(val);
                 }
                 Instruction::Add {} => {
-                    let result = self
-                        .stack
-                        .pop()
-                        .expect("cannot pop from empty stack")
+                    let val = self
+                        .stack_pop()
                         .checked_add(self.stack.pop().expect("cannot pop from empty stack"))
                         .ok_or("overflowed".to_string())?;
-                    self.stack.push(result)
+                    self.stack_push(val);
                 }
                 Instruction::Assign { id } => {
-                    let result = self.stack.pop().expect("cannot pop from empty stack");
-                    self.var_store.insert(id.to_string(), result);
+                    let val = self.stack_pop();
+                    self.var_store.insert(id.to_string(), val);
                 }
                 Instruction::Load { id } => {
-                    let value = self
-                        .get_var(id.into())
-                        .expect(format!("cannot find variable by id - '{}'", id).as_str());
-                    self.stack.push(*value)
+                    self.stack_push(*self.get_var(id.into()));
                 }
             }
         }
