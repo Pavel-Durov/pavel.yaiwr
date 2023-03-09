@@ -9,7 +9,7 @@ mod tests {
     }
 
     #[test]
-    fn declare_variables() {
+    fn variables_declaration() {
         let mut c = Calc::new();
         let mut table = vec![];
         table.push(TestCase {
@@ -26,6 +26,16 @@ mod tests {
             prog: "let _c = 1+2+3+4;",
             key: "_c",
             expected_value: 10,
+        });
+        table.push(TestCase {
+            prog: "let _dA1 = 6;",
+            key: "_dA1",
+            expected_value: 6,
+        });
+        table.push(TestCase {
+            prog: "let _ABCDabc123 = 1984;",
+            key: "_ABCDabc123",
+            expected_value: 1984,
         });
         for t in table {
             let ast = c.from_str(t.prog).unwrap();

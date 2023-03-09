@@ -62,7 +62,7 @@ println(1);
 
 ### Variables
 
-Variables names have to start with "_" character and be one letter long :).
+Variables names have to start with "_" and followup with a any alphanumeric sequence.
 
 Example:
 ```

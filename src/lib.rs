@@ -94,7 +94,8 @@ impl Calc {
                     println!("{}", self.stack.pop().expect("cannot pop from empty stack"))
                 }
                 Instruction::Mul {} => {
-                    let result = self.stack
+                    let result = self
+                        .stack
                         .pop()
                         .expect("cannot pop from empty stack")
                         .checked_mul(self.stack.pop().expect("cannot pop from empty stack"))
@@ -102,7 +103,8 @@ impl Calc {
                     self.stack.push(result)
                 }
                 Instruction::Add {} => {
-                    let result = self.stack
+                    let result = self
+                        .stack
                         .pop()
                         .expect("cannot pop from empty stack")
                         .checked_add(self.stack.pop().expect("cannot pop from empty stack"))
