@@ -42,7 +42,7 @@ mod tests {
             let bytecode = &mut vec![];
             c.to_bytecode(ast, bytecode);
             c.eval(bytecode).unwrap();
-            assert_eq!(c.get_var(t.key.to_string()), &t.expected_value);
+            assert_eq!(c.get_var(t.key.to_string()).unwrap(), &t.expected_value);
         }
     }
 
@@ -68,7 +68,7 @@ mod tests {
                 .arg("run")
                 .arg(t.file_path)
                 .output()
-                .expect(format!("comand 'cargo run {}' failed", t.file_path).as_str());
+                .expect(format!("command 'cargo run {}' failed", t.file_path).as_str());
 
             assert_eq!(String::from_utf8_lossy(&output.stdout), t.expected_output);
         }
