@@ -72,6 +72,7 @@ impl Calc {
 
     pub fn to_bytecode(&self, ast_node: AstNode, prog: &mut Vec<Instruction>) {
         match ast_node {
+            AstNode::Function { id: _ } => {},
             AstNode::Add { lhs, rhs } => {
                 self.to_bytecode(*lhs, prog);
                 self.to_bytecode(*rhs, prog);

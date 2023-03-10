@@ -11,6 +11,10 @@ Expr -> Result<AstNode, ()>:
        let v = $2.map_err(|_| ())?;
        Ok(AstNode::Assign{ id: $lexer.span_str(v.span()).to_string(), rhs: Box::new($4?) }) 
      }
+    | "T_FUNCTION" "ID" "(" parameter_list ")" ";" { 
+       let id = $2.map_err(|_| ())?;
+       Ok(AstNode::Function{ id: $lexer.span_str(id.span()).to_string() }) 
+     }
     ;
 
 Term -> Result<AstNode, ()>:
@@ -30,6 +34,13 @@ Factor -> Result<AstNode, ()>:
     }
     ;
 
+
+parameter_list:
+		parameter
+
+	|	non_empty_parameter_list ',' parameter
+
+;
 
 Unmatched -> ():
       "UNMATCHED" { };

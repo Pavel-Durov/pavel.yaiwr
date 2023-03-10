@@ -7,8 +7,12 @@ _[a-zA-Z0-9_]+ "ID"
 \( "("
 \) ")"
 ; ";"
+, ","
 = "="
+
 println "PRINT_LN" 
 let "ASSIGN"
+fun "T_FUNCTION"
+list "T_LIST"
 [\t\n ]+ ;
 . "UNMATCHED"
