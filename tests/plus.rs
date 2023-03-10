@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use yaiwr::{instruction::Instruction, Calc};
+
     #[test]
     fn eval_add_expression() {
         let mut c = Calc::new();

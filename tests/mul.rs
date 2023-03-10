@@ -19,6 +19,7 @@ mod tests {
         c.to_bytecode(ast, bytecode);
         assert_eq!(c.eval(bytecode).unwrap(), Some(8));
     }
+
     #[test]
     fn mul_bytecode() {
         let c = Calc::new();

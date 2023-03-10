@@ -3,7 +3,6 @@ mod print;
 #[cfg(test)]
 mod tests {
     use std::process::Command;
-
     use yaiwr::{err::InterpError, Calc};
 
     #[test]
@@ -32,6 +31,7 @@ mod tests {
             "Program file: 'imaginary-file.yaiwr' cannot be found!\n"
         );
     }
+    
     #[test]
     fn parse_sderr_error() {
         let output = Command::new("cargo")
