@@ -14,7 +14,7 @@ fn main() {
         if args[1].ends_with(".yaiwr") {
             run_from_file(&args[1], calc)
         } else {
-            eval_line(&args[1], calc);
+            eval_statement(&args[1], calc);
         }
     } else {
         repl(calc);
@@ -28,7 +28,7 @@ pub fn run_from_file(file_name: &str, calc: &mut Calc) {
         .filter(|line| !line.trim().is_empty())
         .collect();
     for line in lines {
-        eval_line(line, calc);
+        eval_statement(line, calc);
     }
 }
 
@@ -42,7 +42,7 @@ fn repl(calc: &mut Calc) {
                 if l.trim().is_empty() {
                     continue;
                 }
-                if let Some(value) = eval_line(l, calc) {
+                if let Some(value) = eval_statement(l, calc) {
                     println!("{}", value);
                 }
             }
@@ -51,28 +51,37 @@ fn repl(calc: &mut Calc) {
     }
 }
 
-fn eval_line(input: &str, calc: &mut Calc) -> Option<u64> {
-    debug!("input: {:?}", &input);
-    let ast = calc.from_str(input);
-    match ast {
-        Ok(ast_node) => {
-            debug!("AST: {:?}", &ast_node);
-            let bytecode = &mut vec![];
-            calc.to_bytecode(ast_node, bytecode);
-            debug!("Bytecode: {:?}", &bytecode);
-            match calc.eval(bytecode) {
-                Ok(result) => {
-                    return result;
-                }
-                Err(msg) => {
-                    eprintln!("Evaluation error: {}", msg);
-                    None
+fn eval_statement(input: &str, calc: &mut Calc) -> Option<u64> {
+    let statements: Vec<String> = input.split(";").map(|x| format!("{};", x)).collect();
+
+    let mut result: Option<u64> = None;
+    for statement in statements {
+        if statement == ";" {
+            continue;
+        }
+        debug!("statement: {:?}", &statement);
+        let ast = calc.from_str(statement.as_str());
+        match ast {
+            Ok(ast_node) => {
+                debug!("AST: {:?}", &ast_node);
+                let bytecode = &mut vec![];
+                calc.to_bytecode(ast_node, bytecode);
+                debug!("Bytecode: {:?}", &bytecode);
+                match calc.eval(bytecode) {
+                    Ok(eval_result) => {
+                        result = eval_result;
+                    }
+                    Err(msg) => {
+                        eprintln!("Evaluation error: {}", msg);
+                        return None;
+                    }
                 }
             }
-        }
-        Err(msg) => {
-            eprintln!("Evaluation error: {}", msg);
-            None
+            Err(msg) => {
+                eprintln!("Evaluation error: {}", msg);
+                return None;
+            }
         }
     }
+    return result;
 }
