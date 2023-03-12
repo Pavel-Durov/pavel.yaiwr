@@ -1,16 +1,19 @@
-%start Expr
+%start TopLevel
 %avoid_insert "INTEGER"
 %expect-unused Unmatched "UNMATCHED"
 %%
 
+TopLevel -> Result<AstNode, ()>:
+    "PRINT_LN" "(" Expr ")" ";" { Ok(AstNode::PrintLn{ rhs: Box::new($3?) }) }
+    | "ASSIGN" "ID" "=" Expr ";" {
+       Ok(AstNode::Assign{ id: $lexer.span_str($2.map_err(|_| ())?.span()).to_string(), rhs: Box::new($4?) }) 
+     }
+    | Expr { $1 }
+    ;
+
 Expr -> Result<AstNode, ()>:
     Expr "ADD" Term { Ok(AstNode::Add{ lhs: Box::new($1?), rhs: Box::new($3?) }) }
     | Term { $1 } 
-    | "PRINT_LN" "(" Expr ")" ";" { Ok(AstNode::PrintLn{ rhs: Box::new($3?) }) }
-    | "ASSIGN" "ID" "=" Expr ";" { 
-       let v = $2.map_err(|_| ())?;
-       Ok(AstNode::Assign{ id: $lexer.span_str(v.span()).to_string(), rhs: Box::new($4?) }) 
-     }
     ;
 
 Term -> Result<AstNode, ()>:
@@ -20,7 +23,11 @@ Term -> Result<AstNode, ()>:
 
 Factor -> Result<AstNode, ()>:
     "(" Expr ")" { $2 }
-    | "INTEGER" { 
+    | Val { $1 }
+    ;
+
+Val -> Result<AstNode, ()>:
+    "INTEGER" { 
         let v = $1.map_err(|_| ())?;
         parse_int($lexer.span_str(v.span()))
       }
@@ -29,6 +36,7 @@ Factor -> Result<AstNode, ()>:
        Ok(AstNode::ID{ value: $lexer.span_str(v.span()).to_string() })
     }
     ;
+
 
 
 Unmatched -> ():
