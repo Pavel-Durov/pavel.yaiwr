@@ -1,13 +1,14 @@
 #[cfg(test)]
 mod tests {
     use yaiwr::{instruction::Instruction, Calc};
+
     #[test]
     fn eval_println_statement_add() {
         let mut c = Calc::new();
         let ast = c.from_str("println(2+2);").unwrap();
         let bytecode = &mut vec![];
         c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode), Ok(None));
+        assert_eq!(c.eval(bytecode).unwrap(), None);
     }
     #[test]
     fn eval_println_statement_mul() {
@@ -15,7 +16,7 @@ mod tests {
         let ast = c.from_str("println(2*2);").unwrap();
         let bytecode = &mut vec![];
         c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode), Ok(None));
+        assert_eq!(c.eval(bytecode).unwrap(), None);
     }
 
     #[test]
@@ -57,7 +58,7 @@ mod tests {
         let ast = c.from_str("println 2+2").unwrap();
         let bytecode = &mut vec![];
         c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode), Ok(None));
+        assert_eq!(c.eval(bytecode).unwrap(), None);
     }
     #[test]
     #[should_panic]
@@ -66,7 +67,7 @@ mod tests {
         let ast = c.from_str("println 2*2").unwrap();
         let bytecode = &mut vec![];
         c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode), Ok(None));
+        assert_eq!(c.eval(bytecode).unwrap(), None);
     }
 
     #[test]
@@ -76,7 +77,7 @@ mod tests {
             .arg("run")
             .arg("println(2);")
             .output()
-            .expect("comand 'cargo run println(2);' failed");
+            .expect("command 'cargo run println(2);' failed");
 
         assert_eq!(String::from_utf8_lossy(&output.stdout), "2\n");
     }

@@ -8,7 +8,7 @@ mod tests {
         let ast = c.from_str("2*2").unwrap();
         let bytecode = &mut vec![];
         c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode), Ok(Some(4)));
+        assert_eq!(c.eval(bytecode).unwrap(), Some(4));
     }
 
     #[test]
@@ -17,8 +17,9 @@ mod tests {
         let ast = c.from_str("2*2*2").unwrap();
         let bytecode = &mut vec![];
         c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode), Ok(Some(8)));
+        assert_eq!(c.eval(bytecode).unwrap(), Some(8));
     }
+
     #[test]
     fn mul_bytecode() {
         let c = Calc::new();
