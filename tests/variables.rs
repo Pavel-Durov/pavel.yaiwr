@@ -1,76 +1,61 @@
 #[cfg(test)]
 mod tests {
+    use std::process::Command;
     use yaiwr::Calc;
 
-    #[test]
-    fn variables_declaration() {
-        struct TestCase<'a> {
-            prog: &'a str,
-            key: &'a str,
-            expected_value: u64,
-        }
+    fn eval_prog(input: &str) -> Calc {
         let mut c = Calc::new();
-        let table = vec![
-            TestCase {
-                prog: "let _a = 2;",
-                key: "_a",
-                expected_value: 2,
-            },
-            TestCase {
-                prog: "let _b = (1+2*3);",
-                key: "_b",
-                expected_value: 7,
-            },
-            TestCase {
-                prog: "let _c = 1+2+3+4;",
-                key: "_c",
-                expected_value: 10,
-            },
-            TestCase {
-                prog: "let _dA1 = 6;",
-                key: "_dA1",
-                expected_value: 6,
-            },
-            TestCase {
-                prog: "let _ABCDabc123 = 1984;",
-                key: "_ABCDabc123",
-                expected_value: 1984,
-            },
-        ];
-        for t in table {
-            let ast = c.from_str(t.prog).unwrap();
-            let bytecode = &mut vec![];
-            c.to_bytecode(ast, bytecode);
-            c.eval(bytecode).unwrap();
-            assert_eq!(c.get_var(t.key.to_string()).unwrap(), &t.expected_value);
-        }
+        let ast = c.from_str(input).unwrap();
+        let bytecode = &mut vec![];
+        c.to_bytecode(ast, bytecode);
+        c.eval(bytecode).unwrap();
+        return c;
     }
 
     #[test]
-    fn variables_expression() {
-        use std::process::Command;
-        struct TestCase<'a> {
-            file_path: &'a str,
-            expected_output: &'a str,
-        }
-        let table = vec![
-            TestCase {
-                file_path: "./programs/tests/var_expect_output_10.yaiwr",
-                expected_output: "10\n",
-            },
-            TestCase {
-                file_path: "./programs/tests/var_expect_output_1984.yaiwr",
-                expected_output: "1984\n",
-            },
-        ];
-        for t in table {
-            let output = Command::new("cargo")
-                .arg("run")
-                .arg(t.file_path)
-                .output()
-                .expect(format!("command 'cargo run {}' failed", t.file_path).as_str());
+    fn var_single_numeric() {
+        let c = eval_prog("let _a = 2;");
+        assert_eq!(c.get_var("_a".to_string()).unwrap(), &2);
+    }
+    #[test]
+    fn var_expression() {
+        let c = eval_prog("let _b = (1+2*3);");
+        assert_eq!(c.get_var("_b".to_string()).unwrap(), &7);
+    }
 
-            assert_eq!(String::from_utf8_lossy(&output.stdout), t.expected_output);
-        }
+    #[test]
+    fn var_multiple_lower_upper_numeric() {
+        let c = eval_prog("let _ABCDabc123 = 1984;");
+        assert_eq!(c.get_var("_ABCDabc123".to_string()).unwrap(), &1984);
+    }
+
+    #[test]
+    fn var_single_lower_upper_numeric() {
+        let c = eval_prog("let _aB1 = 1984;");
+        assert_eq!(c.get_var("_aB1".to_string()).unwrap(), &1984);
+    }
+
+    #[test]
+    fn var_test_file_expect_output_10() {
+        let file_path = "./programs/tests/var_expect_output_10.yaiwr";
+        let output = Command::new("cargo")
+            .arg("run")
+            .arg(file_path)
+            .output()
+            .expect(format!("comand 'cargo run {}' failed", file_path).as_str());
+
+        assert_eq!(String::from_utf8_lossy(&output.stdout), "10\n",);
+    }
+
+    #[test]
+    fn var_test_file_expect_output_1984() {
+        let file_path = "./programs/tests/var_expect_output_1984.yaiwr";
+        let output = Command::new("cargo")
+            .arg("run")
+            .arg(file_path)
+            .output()
+            .expect(format!("comand 'cargo run {}' failed", file_path).as_str());
+
+        assert_eq!(String::from_utf8_lossy(&output.stdout), "1984\n",);
     }
 }
