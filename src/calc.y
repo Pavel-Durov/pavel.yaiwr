@@ -11,9 +11,24 @@ Expr -> Result<AstNode, ()>:
        let v = $2.map_err(|_| ())?;
        Ok(AstNode::Assign{ id: $lexer.span_str(v.span()).to_string(), rhs: Box::new($4?) }) 
      }
-    | "T_FUNCTION" "ID" "(" parameter_list ")" ";" { 
-       let id = $2.map_err(|_| ())?;
-       Ok(AstNode::Function{ id: $lexer.span_str(id.span()).to_string() }) 
+    | Function { $1 }
+    ;
+
+Function -> Result<AstNode, ()>:
+    "FUNCTION" "ID" "(" ParamList ")" "{" "}" { 
+        let id = $2.map_err(|_| ())?;
+        Ok(AstNode::Function{ 
+            id: $lexer.span_str(id.span()).to_string(),
+            params: $4.map_err(|_| ())?
+        }) 
+     }
+    ;
+
+
+ParamList -> Result<Vec<AstNode>, ()>:
+    ParamList ',' Expr { combine($1.map_err(|_| ())?, $3.map_err(|_| ())?) }
+    | Expr { 
+        Ok(vec![$1.map_err(|_| ())?])
      }
     ;
 
@@ -35,19 +50,18 @@ Factor -> Result<AstNode, ()>:
     ;
 
 
-parameter_list:
-		parameter
-
-	|	non_empty_parameter_list ',' parameter
-
-;
 
 Unmatched -> ():
       "UNMATCHED" { };
 %%
 
 use crate::ast::AstNode;
+use lrlex::DefaultLexeme;
 
+fn combine(mut lhs: Vec<AstNode>, rhs: AstNode ) -> Result<Vec<AstNode>, ()>{
+    lhs.push(rhs);
+    Ok(lhs)
+}
 
 fn parse_int(s: &str) -> Result<AstNode, ()> {
     match s.parse::<u64>() {

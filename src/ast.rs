@@ -23,6 +23,6 @@ pub enum AstNode {
     },
     Function {
         id: String,
-        // params: Vec<ID>
+        params: Vec<AstNode>,
     },
 }
