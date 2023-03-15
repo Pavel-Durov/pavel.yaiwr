@@ -104,7 +104,7 @@ mod tests {
             _ => panic!("expected bytecodes to be not empty!"),
         }
         calc.eval(func_declaration_bytecode).unwrap();
-        let prog_func_call = "_add(1,2);";
+        let prog_func_call = "_add(1,2)";
         let ast = calc.from_str(prog_func_call).unwrap();
         let func_call_bytecode = &mut vec![];
         calc.to_bytecode(ast, func_call_bytecode);
@@ -130,14 +130,14 @@ mod tests {
         let c = &mut Calc::new();
         eval_prog(c, "fun _add1 (_p1){ return _p1 + 1; }").unwrap();
         eval_prog(c, "fun _add2 (_p1){ return _p1 + 2; }").unwrap();
-        assert_eq!(eval_prog(c, "_add2(_add1(1););").unwrap().unwrap(), 4);
+        assert_eq!(eval_prog(c, "_add2(_add1(1))").unwrap().unwrap(), 4);
     }
 
     #[test]
     fn function_multiple_params() {
         let c = &mut Calc::new();
         eval_prog(c, "fun _add (_p1, _p2, _p3){ return _p1 + _p2 +_p3; }").unwrap();
-        assert_eq!(eval_prog(c, "_add(1,2,3);").unwrap().unwrap(), 6);
+        assert_eq!(eval_prog(c, "_add(1,2,3)").unwrap().unwrap(), 6);
     }
 
     #[test]
@@ -146,7 +146,7 @@ mod tests {
         eval_prog(c, "let _x = 2;").unwrap();
         eval_prog(c, "let _y = 3;").unwrap();
         eval_prog(c, "fun _add (_arg1, _arg2){ return _arg1 + _arg2; }").unwrap();
-        assert_eq!(eval_prog(c, "_add(_x, _y);").unwrap().unwrap(), 5);
+        assert_eq!(eval_prog(c, "_add(_x, _y)").unwrap().unwrap(), 5);
     }
 
     #[test]
@@ -175,7 +175,7 @@ mod tests {
             }
             _ => panic!("expected bytecodes to be not empty!"),
         }
-        let prog_func_call = "_two_plus_two();";
+        let prog_func_call = "_two_plus_two()";
         let ast = calc.from_str(prog_func_call).unwrap();
         let bytecode = &mut vec![];
         calc.to_bytecode(ast, bytecode);

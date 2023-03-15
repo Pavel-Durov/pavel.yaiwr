@@ -73,7 +73,7 @@ Return -> Result<AstNode, ()>:
     "RETURN" Expr ";" { Ok(AstNode::Return{ block: Box::new($2?) }) };
 
 FunctionCallNoParams -> Result<AstNode, ()>:
-    "ID" "(" ")" ";" { 
+    "ID" "(" ")" { 
         let id = $1.map_err(|_| ())?;
         Ok(AstNode::FunctionCall{ 
             id: $lexer.span_str(id.span()).to_string(),
@@ -82,7 +82,7 @@ FunctionCallNoParams -> Result<AstNode, ()>:
     };
 
 FunctionCallWithParams -> Result<AstNode, ()>:
-    "ID" "(" ArgList ")" ";" { 
+    "ID" "(" ArgList ")" { 
         let id = $1.map_err(|_| ())?;
         Ok(AstNode::FunctionCall{ 
             id: $lexer.span_str(id.span()).to_string(),
