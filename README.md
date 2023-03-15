@@ -121,7 +121,6 @@ Example:
 _add(1,2)
 ```
 
-
 # TODOs
 
 [x] Go through the calc example in the quick start guide
