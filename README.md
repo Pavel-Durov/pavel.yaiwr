@@ -76,11 +76,11 @@ Variable names:
 let <name> = <expression>;
 ```
 
-`let` - keyword indicating beginning of variable declaration
+`let` - keyword indicating the beginning of the variable declaration
 
 `<name>` - variable name
 
-`<expression>` - expression that will be evaluated and assined to the variable
+`<expression>` - expression that will be evaluated and assigned to the variable
 
 Example:
 ```
@@ -98,7 +98,7 @@ let _y = 1 * _x;
 fun <name> (<params>) { <statements> }
 ```
 
-`<fun>` - keyword indicating beginning of a function declaration
+`<fun>` - keyword indicating the beginning of a function declaration
 
 `<name>` - Same as variable names
 
