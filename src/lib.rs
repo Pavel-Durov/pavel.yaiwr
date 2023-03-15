@@ -198,6 +198,7 @@ impl Calc {
                         args.len()
                     )));
                 }
+                // TODO: Implement function scope. Once we have recursion support this variable setup wont work!
                 for (i, p) in params.iter().enumerate() {
                     self.var_store.insert(p.to_string(), args[i]);
                 }
