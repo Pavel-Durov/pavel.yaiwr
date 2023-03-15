@@ -10,7 +10,12 @@ mod tests {
         let c = Calc::new();
         let parsing_err = c.from_str("invalid input").err().unwrap();
 
-        assert!(matches!(parsing_err, InterpError::ParseError(..)));
+        assert_eq!(
+            parsing_err,
+            InterpError::ParseError(
+                "Parsing error at line 1 column 1. No repair sequences found.".to_string()
+            )
+        )
     }
 
     #[test]

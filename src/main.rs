@@ -39,7 +39,7 @@ pub fn run_from_file(file_name: &str, calc: &mut Calc) {
                 .filter(|line| !line.trim().is_empty())
                 .collect();
             for line in lines {
-                print_result(eval_line(line, calc));
+                eval_line(line, calc).unwrap();
             }
         }
         Err(_) => print_result(Err(InterpError::ProgramFileNotFound(file_name.to_string()))),
