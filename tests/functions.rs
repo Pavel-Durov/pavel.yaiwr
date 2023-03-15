@@ -10,6 +10,44 @@ mod tests {
     }
 
     #[test]
+    fn function_composition() {
+        let c = &mut Calc::new();
+        eval_prog(c, "fun _add1 (_p1){ return _p1 + 1; }").unwrap();
+        eval_prog(c, "fun _add2 (_p1){ return _p1 + 2; }").unwrap();
+        assert_eq!(eval_prog(c, "_add2(_add1(1))").unwrap().unwrap(), 4);
+    }
+
+    #[test]
+    fn function_multiple_params() {
+        let c = &mut Calc::new();
+        eval_prog(c, "fun _add (_p1, _p2, _p3){ return _p1 + _p2 +_p3; }").unwrap();
+        assert_eq!(eval_prog(c, "_add(1,2,3)").unwrap().unwrap(), 6);
+    }
+
+    #[test]
+    fn function_params_as_variables() {
+        let c = &mut Calc::new();
+        eval_prog(c, "let _x = 2;").unwrap();
+        eval_prog(c, "let _y = 3;").unwrap();
+        eval_prog(c, "fun _add (_arg1, _arg2){ return _arg1 + _arg2; }").unwrap();
+        assert_eq!(eval_prog(c, "_add(_x, _y)").unwrap().unwrap(), 5);
+    }
+
+    #[test]
+    fn function_call_from_function_call() {
+        let c = &mut Calc::new();
+        eval_prog(c, "let _x = 2;").unwrap();
+        eval_prog(c, "let _y = 3;").unwrap();
+        eval_prog(
+            c,
+            "fun _add (_arg1, _arg2){ return _id(_arg1) + _id(_arg2); }",
+        )
+        .unwrap();
+        eval_prog(c, "fun _id (_arg1){ return _arg1; }").unwrap();
+        assert_eq!(eval_prog(c, "_add(_x, _y)").unwrap().unwrap(), 5);
+    }
+
+    #[test]
     fn function_declaration_no_params_bytecode() {
         let calc = &mut Calc::new();
         let prog1 = "fun _some (){ return 2*2; }";
@@ -39,7 +77,7 @@ mod tests {
     }
 
     #[test]
-    fn function_declaration_with_params() {
+    fn function_declaration_with_params_bytecode() {
         let calc = &mut Calc::new();
         let prog = "fun _add (_p1, _p2){ return _p1 + _p2 + 1; }";
         let ast = calc.from_str(prog).unwrap();
@@ -126,31 +164,7 @@ mod tests {
     }
 
     #[test]
-    fn function_composition() {
-        let c = &mut Calc::new();
-        eval_prog(c, "fun _add1 (_p1){ return _p1 + 1; }").unwrap();
-        eval_prog(c, "fun _add2 (_p1){ return _p1 + 2; }").unwrap();
-        assert_eq!(eval_prog(c, "_add2(_add1(1))").unwrap().unwrap(), 4);
-    }
-
-    #[test]
-    fn function_multiple_params() {
-        let c = &mut Calc::new();
-        eval_prog(c, "fun _add (_p1, _p2, _p3){ return _p1 + _p2 +_p3; }").unwrap();
-        assert_eq!(eval_prog(c, "_add(1,2,3)").unwrap().unwrap(), 6);
-    }
-
-    #[test]
-    fn function_params_as_variables() {
-        let c = &mut Calc::new();
-        eval_prog(c, "let _x = 2;").unwrap();
-        eval_prog(c, "let _y = 3;").unwrap();
-        eval_prog(c, "fun _add (_arg1, _arg2){ return _arg1 + _arg2; }").unwrap();
-        assert_eq!(eval_prog(c, "_add(_x, _y)").unwrap().unwrap(), 5);
-    }
-
-    #[test]
-    fn function_declaration_no_params_call() {
+    fn function_declaration_no_params_call_bytecode() {
         let calc = &mut Calc::new();
         let prog_func_declaration = "fun _two_plus_two (){ return (2+2); }";
         let ast = calc.from_str(prog_func_declaration).unwrap();
