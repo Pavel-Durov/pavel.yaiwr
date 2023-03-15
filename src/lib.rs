@@ -213,13 +213,13 @@ impl Calc {
 
     pub fn eval(&mut self, instructions: &Vec<Instruction>) -> Result<Option<u64>, InterpError> {
         for instruction in instructions {
+            debug!("eval: {:?}", instruction);
             match instruction {
                 Instruction::Return { block } => {
                     let val = self.eval(block)?;
                     if let Some(x) = val {
                         self.stack_push(x);
                     }
-
                 }
                 Instruction::Function {
                     block: body,

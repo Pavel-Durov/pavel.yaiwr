@@ -63,7 +63,7 @@ fn repl(calc: &mut Calc) {
     }
 }
 
-fn eval_line(input: &str, calc: &mut Calc) -> Result<Option<u64>, InterpError> {
+pub fn eval_line(input: &str, calc: &mut Calc) -> Result<Option<u64>, InterpError> {
     debug!("input: {:?}", &input);
     let ast = calc.from_str(input);
     match ast {
