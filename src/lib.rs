@@ -15,18 +15,26 @@ use ast::AstNode;
 use err::InterpError;
 
 pub struct Calc {
-    var_store: HashMap<String, u64>,
     fun_store: HashMap<String, Instruction>,
     stack: Vec<u64>,
+    scope: Scope,
 }
 
-impl Calc {
-    pub fn new() -> Calc {
-        Calc {
+#[derive(Debug, Clone)]
+pub struct Scope {
+    var_store: HashMap<String, u64>,
+}
+
+impl Scope {
+    fn clone(scope: &Scope) -> Scope {
+        return Scope {
+            var_store: scope.var_store.clone(),
+        };
+    }
+    pub fn new() -> Scope {
+        return Scope {
             var_store: HashMap::new(),
-            fun_store: HashMap::new(),
-            stack: vec![],
-        }
+        };
     }
 
     pub fn get_var(&self, id: String) -> Result<&u64, InterpError> {
@@ -36,6 +44,19 @@ impl Calc {
             .ok_or(InterpError::VariableNotFound(id));
     }
 
+    pub fn set_var(&mut self, id: String, val: u64) {
+        self.var_store.insert(id.to_string(), val);
+    }
+}
+
+impl Calc {
+    pub fn  new<'b> () -> Calc {
+        Calc {
+            fun_store: HashMap::new(),
+            stack: vec![],
+            scope: Scope::new()
+        }
+    }
     pub fn stack_pop(&mut self) -> Result<u64, InterpError> {
         let val = self.stack.pop().ok_or(InterpError::EmptyStack)?;
         debug!("STACK POP: {:?}", &self.stack);
@@ -163,10 +184,11 @@ impl Calc {
     fn eval_function_args(
         &mut self,
         args: &Vec<Vec<Instruction>>,
+        scope: &mut Scope,
     ) -> Result<Vec<u64>, InterpError> {
         let mut result = vec![];
         for arg_set in args {
-            let evaluated = self.eval(arg_set);
+            let evaluated = self.eval_with_scope(arg_set, scope);
             match evaluated {
                 Ok(Some(x)) => result.push(x),
                 Ok(None) => {}
@@ -180,6 +202,7 @@ impl Calc {
         &mut self,
         args: &Vec<u64>,
         id: &String,
+        scope: &mut Scope,
     ) -> Result<Option<u64>, InterpError> {
         let function = self
             .fun_store
@@ -200,9 +223,9 @@ impl Calc {
                 }
                 // TODO: Implement function scope. Once we have recursion support this variable setup wont work!
                 for (i, p) in params.iter().enumerate() {
-                    self.var_store.insert(p.to_string(), args[i]);
+                    scope.set_var(p.to_string(), args[i])
                 }
-                return self.eval(&body.clone());
+                return self.eval_with_scope(&body.clone(), scope);
             }
             _ => {
                 return Err(InterpError::EvalError(
@@ -213,27 +236,33 @@ impl Calc {
     }
 
     pub fn eval(&mut self, instructions: &Vec<Instruction>) -> Result<Option<u64>, InterpError> {
+        let s = &mut self.scope.clone();
+        self.eval_with_scope(instructions, s)
+    }
+
+    pub fn eval_with_scope(
+        &mut self,
+        instructions: &Vec<Instruction>,
+        scope: &mut Scope,
+    ) -> Result<Option<u64>, InterpError> {
         for instruction in instructions {
-            debug!("eval: {:?}", instruction);
+            debug!(">>>>>>>>>>>>> eval: {:?}", instruction);
+            debug!(">>>>>>>>>>>>> eval scope {:?} {:p}", scope, &scope);
             match instruction {
                 Instruction::Return { block } => {
-                    let val = self.eval(block)?;
+                    let val = self.eval_with_scope(block, scope)?;
                     if let Some(x) = val {
                         self.stack_push(x);
                     }
                 }
-                Instruction::Function {
-                    block: body,
-                    id,
-                    params,
-                } => {
+                Instruction::Function { block, id, params } => {
                     if let None = self.fun_store.get(id) {
                         self.fun_store.insert(
                             id.to_string(),
                             Instruction::Function {
                                 id: id.to_string(),
                                 params: params.to_vec(),
-                                block: body.to_vec(),
+                                block: block.to_vec(),
                             },
                         );
                     } else {
@@ -244,8 +273,11 @@ impl Calc {
                     }
                 }
                 Instruction::FunctionCall { id, args } => {
-                    let arg_list = self.eval_function_args(&args)?;
-                    let res = self.eval_function_call(&arg_list, id)?;
+                    debug!("@@@@@ scope pre clone: {:?}", &scope);
+                    let clonned_scope = &mut Scope::clone(scope);
+                    debug!("@@@@@ scope psot clone: {:?}", &scope);
+                    let arg_list = self.eval_function_args(&args, clonned_scope)?;
+                    let res = self.eval_function_call(&arg_list, id, clonned_scope)?;
                     if let Some(x) = res {
                         self.stack_push(x);
                     }
@@ -270,13 +302,16 @@ impl Calc {
                 }
                 Instruction::Assign { id } => {
                     let val = self.stack_pop()?;
-                    self.var_store.insert(id.to_string(), val);
+                    scope.set_var(id.to_string(), val);
+                    debug!("@@@@ eval: assign: {:?}", &scope);
                 }
                 Instruction::Load { id } => {
-                    self.stack_push(*self.get_var(id.into())?);
+                    debug!("@@@@@ Load:scope: {:?}", &scope);
+                    self.stack_push(*scope.get_var(id.into())?);
                 }
             }
         }
+        debug!(">>>>>>>>>>>>> eval scope - END {:?} {:p}", self.scope, &self.scope);
         if self.stack.is_empty() {
             return Ok(None);
         }

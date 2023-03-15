@@ -1,38 +1,41 @@
 #[cfg(test)]
 mod tests {
-    use std::process::Command;
-    use yaiwr::Calc;
+    use std::{process::Command};
+    use yaiwr::{Calc, Scope};
 
-    fn eval_prog(input: &str) -> Calc {
+    fn eval_prog(input: &str, scope: &mut Scope)  {
         let mut c = Calc::new();
         let ast = c.from_str(input).unwrap();
         let bytecode = &mut vec![];
         c.to_bytecode(ast, bytecode);
-        c.eval(bytecode).unwrap();
-        return c;
+        c.eval_with_scope(bytecode, scope).unwrap();        
     }
 
     #[test]
     fn var_single_numeric() {
-        let c = eval_prog("let _a = 2;");
-        assert_eq!(c.get_var("_a".to_string()).unwrap(), &2);
+        let scope = &mut Scope::new();
+        eval_prog("let _a = 2;", scope);
+        assert_eq!(scope.get_var("_a".to_string()).unwrap(), &2);
     }
     #[test]
     fn var_expression() {
-        let c = eval_prog("let _b = (1+2*3);");
-        assert_eq!(c.get_var("_b".to_string()).unwrap(), &7);
+        let scope = &mut Scope::new();
+        eval_prog("let _b = (1+2*3);", scope);
+        assert_eq!(scope.get_var("_b".to_string()).unwrap(), &7);
     }
 
     #[test]
     fn var_multiple_lower_upper_numeric() {
-        let c = eval_prog("let _ABCDabc123 = 1984;");
-        assert_eq!(c.get_var("_ABCDabc123".to_string()).unwrap(), &1984);
+        let scope = &mut Scope::new();
+        eval_prog("let _ABCDabc123 = 1984;", scope);
+        assert_eq!(scope.get_var("_ABCDabc123".to_string()).unwrap(), &1984);
     }
 
     #[test]
     fn var_single_lower_upper_numeric() {
-        let c = eval_prog("let _aB1 = 1984;");
-        assert_eq!(c.get_var("_aB1".to_string()).unwrap(), &1984);
+        let scope = &mut Scope::new();
+        eval_prog("let _aB1 = 1984;", scope);
+        assert_eq!(scope.get_var("_aB1".to_string()).unwrap(), &1984);
     }
 
     #[test]
