@@ -215,7 +215,11 @@ impl Calc {
         for instruction in instructions {
             match instruction {
                 Instruction::Return { block } => {
-                    return self.eval(block)
+                    let val = self.eval(block)?;
+                    if let Some(x) = val {
+                        self.stack_push(x);
+                    }
+
                 }
                 Instruction::Function {
                     block: body,
