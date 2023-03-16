@@ -257,7 +257,7 @@ impl Calc {
                 return Ok(Some(x));
             },
             Err(err) => return Err(err),
-            _ => return Err(InterpError::EvalError("Unexpected stack value type".to_string()))
+            _ => Ok(None)
         }
     }
 }
