@@ -6,9 +6,8 @@ mod tests {
     fn eval_prog(input: &str) -> Calc {
         let mut c = Calc::new();
         let ast = c.from_str(input).unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        c.eval(bytecode).unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
+        c.eval(&bytecode).unwrap();
         return c;
     }
 
