@@ -72,6 +72,16 @@ Variable names:
 1. Variable names have to start with "_"
 2. Variable names can only include alphanumeric and underscore ("_") characters
 
+```
+let <name> = <expression>;
+```
+
+`let` - keyword indicating the beginning of the variable declaration
+
+`<name>` - variable name
+
+`<expression>` - expression that will be evaluated and assigned to the variable
+
 Example:
 ```
 let _someVariable = (1+2);
@@ -79,7 +89,37 @@ let _someVariable3 = 1;
 let _x = 2;
 let _y = 1 * _x;
 ```
-Repl: 
+
+### Functions
+
+#### Function Declaration
+
+```
+fun <name> (<params>) { <statements> }
+```
+
+`<fun>` - keyword indicating the beginning of a function declaration
+
+`<name>` - Same as variable names
+
+`<params>` - (optional) single or list of parameters passed to the function
+
+`<statements>` - statements that comprise the body of the function
+
+Example:
+```
+"fun _add (_arg1, _arg2){ return _arg1 + _arg2; }
+```
+#### Function calls
+
+`<name>` (`<arguments>`)
+
+`<arguments>` - (optional) single or list of parameters passed to the function
+
+Example:
+```
+_add(1,2)
+```
 
 # TODOs
 
@@ -95,11 +135,13 @@ Repl:
 
 [x] Implement variables
 
+[x] Implement functions
+
+[x] Implement conditional statements
+
 [ ] Propogate all errors to top-level where the error is printed
 
 [ ] Compile variable names to integers
-
-[ ] Implement functions
 
 [ ] Add support for custom error handling, i.e InterpError
 
@@ -132,3 +174,5 @@ Repl:
 
 [Quickstart](https://softdevteam.github.io/grmtools/master/book/quickstart.html)
 Yet Another Interpreter Written In Rust
+
+[Grammars](https://github.com/softdevteam/grammars/)

@@ -22,7 +22,7 @@ mod tests {
 
     #[test]
     fn mul_bytecode() {
-        let c = Calc::new();
+        let mut c = Calc::new();
         let ast = c.from_str("1*2").unwrap();
         let bytecode = &mut vec![];
         c.to_bytecode(ast, bytecode);

@@ -10,6 +10,7 @@ mod tests {
         c.to_bytecode(ast, bytecode);
         assert_eq!(c.eval(bytecode).unwrap(), None);
     }
+
     #[test]
     fn eval_println_statement_mul() {
         let mut c = Calc::new();
@@ -21,7 +22,7 @@ mod tests {
 
     #[test]
     fn println_statement_numeric_bytecode() {
-        let c = Calc::new();
+        let mut c = Calc::new();
         let ast = c.from_str("println(1);").unwrap();
         let bytecode = &mut vec![];
         c.to_bytecode(ast, bytecode);
@@ -36,7 +37,7 @@ mod tests {
 
     #[test]
     fn print_statement_add_bytecode() {
-        let c = Calc::new();
+        let mut c = Calc::new();
         let ast = c.from_str("println (1+1);").unwrap();
         let bytecode = &mut vec![];
         c.to_bytecode(ast, bytecode);

@@ -9,7 +9,6 @@ mod tests {
     fn eval_error() {
         let c = Calc::new();
         let parsing_err = c.from_str("invalid input").err().unwrap();
-
         assert!(matches!(parsing_err, InterpError::ParseError(..)));
     }
 
@@ -23,7 +22,7 @@ mod tests {
             .expect(format!("command 'cargo run imaginary-file.yaiwr' failed").as_str());
         assert_eq!(
             String::from_utf8_lossy(&output.stderr),
-            "Evaluation error: Program file: 'imaginary-file.yaiwr' cannot be found!\n"
+            "Program file: 'imaginary-file.yaiwr' cannot be found!\n"
         );
     }
 
@@ -37,7 +36,7 @@ mod tests {
             .expect(format!("command 'cargo run ???' failed").as_str());
         assert_eq!(
             String::from_utf8_lossy(&output.stderr),
-            "Evaluation error: Parse error: Parsing error at line 1 column 4. Repair sequences found:\n   1: Delete );!\n"
+            "Parse error: Parsing error at line 1 column 4. Repair sequences found:\n   1: Delete )!\n"
         );
     }
 }
