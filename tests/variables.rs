@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use std::process::Command;
-    use yaiwr::Calc;
+    use yaiwr::{Calc, StackValue};
 
     fn eval_prog(input: &str) -> Calc {
         let mut c = Calc::new();
@@ -15,24 +15,37 @@ mod tests {
     #[test]
     fn var_single_numeric() {
         let c = eval_prog("let _a = 2;");
-        assert_eq!(c.get_var("_a".to_string()).unwrap(), &2);
+
+        match c.get_var("_a".to_string()).unwrap() {
+            StackValue::Variable(id, val) => assert_eq!(val, 2),
+            _ => panic!("!"),
+        }
     }
     #[test]
     fn var_expression() {
         let c = eval_prog("let _b = (1+2*3);");
-        assert_eq!(c.get_var("_b".to_string()).unwrap(), &7);
+        match c.get_var("_a".to_string()).unwrap() {
+            StackValue::Variable(id, val) => assert_eq!(val, 7),
+            _ => panic!("!"),
+        }
     }
 
     #[test]
     fn var_multiple_lower_upper_numeric() {
         let c = eval_prog("let _ABCDabc123 = 1984;");
-        assert_eq!(c.get_var("_ABCDabc123".to_string()).unwrap(), &1984);
+        match c.get_var("_a".to_string()).unwrap() {
+            StackValue::Variable(id, val) => assert_eq!(val, 1984),
+            _ => panic!("!"),
+        }
     }
 
     #[test]
     fn var_single_lower_upper_numeric() {
-        let c = eval_prog("let _aB1 = 1984;");
-        assert_eq!(c.get_var("_aB1".to_string()).unwrap(), &1984);
+        let c = eval_prog("let _aB1 = 1984;");        
+        match c.get_var("_a".to_string()).unwrap() {
+            StackValue::Variable(id, val) => assert_eq!(val, 1984),
+            _ => panic!("!"),
+        }
     }
 
     #[test]

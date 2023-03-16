@@ -2,7 +2,7 @@ use instruction::Instruction;
 use log::debug;
 use lrlex::{lrlex_mod, DefaultLexerTypes};
 use lrpar::{lrpar_mod, LexParseError, NonStreamingLexer};
-use std::collections::HashMap;
+use std::collections::{HashMap};
 
 lrlex_mod!("calc.l");
 lrpar_mod!("calc.y");
@@ -14,35 +14,51 @@ pub mod instruction;
 use ast::AstNode;
 use err::InterpError;
 
+#[derive(Debug)]
+pub enum StackValue 
+{
+    Value(u64),
+    Variable(String, u64)
+}
+
+#[derive(Debug)]
 pub struct Calc {
-    var_store: HashMap<String, u64>,
+    // var_store: HashMap<String, u64>,
     fun_store: HashMap<String, Instruction>,
-    stack: Vec<u64>,
+    stack: Vec<StackValue>,
 }
 
 impl Calc {
     pub fn new() -> Calc {
         Calc {
-            var_store: HashMap::new(),
+            // var_store: HashMap::new(),
             fun_store: HashMap::new(),
             stack: vec![],
         }
     }
 
-    pub fn get_var(&self, id: String) -> Result<&u64, InterpError> {
-        return self
-            .var_store
-            .get(&id)
-            .ok_or(InterpError::VariableNotFound(id));
+    pub fn get_var(&self, get_id: String) -> Result<StackValue, InterpError> {
+        for var in self.stack.iter() {
+            if let StackValue::Variable(id, val) = var {
+                if  *id == get_id{
+                    return Ok(StackValue::Variable(get_id, *val));
+                }
+            }
+        }
+        return Err(InterpError::VariableNotFound(get_id));
     }
 
-    pub fn stack_pop(&mut self) -> Result<u64, InterpError> {
+    pub fn set_var(&mut self, val: StackValue) {
+        self.stack.push(val);
+    }
+
+    pub fn stack_pop(&mut self) -> Result<StackValue, InterpError> {
         let val = self.stack.pop().ok_or(InterpError::EmptyStack)?;
         debug!("STACK POP: {:?}", &self.stack);
         return Ok(val);
     }
 
-    pub fn stack_push(&mut self, val: u64) {
+    pub fn stack_push(&mut self, val: StackValue) {
         self.stack.push(val);
         debug!("STACK PUSH: {:?}", &self.stack);
     }
@@ -200,7 +216,7 @@ impl Calc {
                 }
                 // TODO: Implement function scope. Once we have recursion support this variable setup wont work!
                 for (i, p) in params.iter().enumerate() {
-                    self.var_store.insert(p.to_string(), args[i]);
+                    self.stack.push(StackValue::Variable(p.to_string(), args[i]));
                 }
                 return self.eval(&body.clone());
             }
@@ -219,7 +235,7 @@ impl Calc {
                 Instruction::Return { block } => {
                     let val = self.eval(block)?;
                     if let Some(x) = val {
-                        self.stack_push(x);
+                        self.stack_push(StackValue::Value(x));
                     }
                 }
                 Instruction::Function {
@@ -247,39 +263,75 @@ impl Calc {
                     let arg_list = self.eval_function_args(&args)?;
                     let res = self.eval_function_call(&arg_list, id)?;
                     if let Some(x) = res {
-                        self.stack_push(x);
+                        self.stack_push(StackValue::Value(x));
                     }
                 }
-                Instruction::Push { value } => self.stack.push(*value),
+                Instruction::Push { value } => self.stack.push(StackValue::Value(*value)),
                 Instruction::PrintLn => {
-                    println!("{}", self.stack.pop().unwrap());
+                    if let StackValue::Value(val) = self.stack.pop().unwrap(){
+                        println!("{:?}", val) ;    
+                    }
                 }
                 Instruction::Mul {} => {
-                    let val = self
-                        .stack_pop()?
-                        .checked_mul(self.stack_pop()?)
-                        .ok_or(InterpError::Numeric("overflowed".to_string()))?;
-                    self.stack_push(val);
+                    match self.stack_pop(){
+                        Ok(StackValue::Value(x)) => {
+                            match self.stack_pop(){
+                                Ok(StackValue::Value(y)) => {
+                                    let result = x.checked_mul(y)
+                                    .ok_or(InterpError::Numeric("overflowed".to_string()))?;
+                                    self.stack_push(StackValue::Value(result));   
+                                },
+                                Err(err) => return Err(err),
+                                _ => {}// return Err(InterpError::EvalError("Unexpected stack value type".to_string()))
+                            }
+                        },
+                        Err(err) => return Err(err),
+                        _ => {}// return Err(InterpError::EvalError("Unexpected stack value type".to_string()))
+                    }
                 }
                 Instruction::Add {} => {
-                    let val = self
-                        .stack_pop()?
-                        .checked_add(self.stack_pop()?)
-                        .ok_or(InterpError::Numeric("overflowed".to_string()))?;
-                    self.stack_push(val);
+                    match self.stack_pop(){
+                        Ok(StackValue::Value(x)) => {
+                            match self.stack_pop(){
+                                Ok(StackValue::Value(y)) => {
+                                    let result = x.checked_add(y)
+                                    .ok_or(InterpError::Numeric("overflowed".to_string()))?;
+                                    self.stack_push(StackValue::Value(result));   
+                                },
+                                Err(err) => return Err(err),
+                                _ => {}// return Err(InterpError::EvalError("Unexpected stack value type".to_string()))
+                            }
+                        },
+                        Err(err) => return Err(err),
+                        _ => {}// return Err(InterpError::EvalError("Unexpected stack value type".to_string()))
+                    }
                 }
                 Instruction::Assign { id } => {
                     let val = self.stack_pop()?;
-                    self.var_store.insert(id.to_string(), val);
+                    if let StackValue::Value(x) = val {
+                        self.set_var(StackValue::Variable(id.to_string(), x));
+                    }
+                    
                 }
                 Instruction::Load { id } => {
-                    self.stack_push(*self.get_var(id.into())?);
+                    let var = self.get_var(id.into())?;
+                    if let StackValue::Variable(_, val) = var{
+                        self.stack_push(StackValue::Value(val));
+                    }
+                    
                 }
             }
         }
         if self.stack.is_empty() {
             return Ok(None);
         }
-        return Ok(Some(self.stack.pop().unwrap()));
+        
+        match self.stack_pop(){
+            Ok(StackValue::Value(x)) => {
+                return Ok(Some(x));
+            },
+            Err(err) => return Err(err),
+            _ => return Err(InterpError::EvalError("Unexpected stack value type".to_string()))
+        }
     }
 }
