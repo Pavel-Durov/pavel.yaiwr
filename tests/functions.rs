@@ -9,6 +9,19 @@ mod tests {
     }
 
     #[test]
+    fn function_call_err() {
+        let calc = &mut Calc::new();
+        eval_prog(calc, "fun _add1 (_p1){ return _p1 + 1; }").unwrap();
+        assert_eq!(eval_prog(calc, "_add1()"), Err(InterpError::EvalError("Unexpected number of function arguments. Expected: 1, Got: 0".to_string())));
+    }
+
+    #[test]
+    fn function_undefined_err() {
+        let calc = &mut Calc::new();
+        assert_eq!(eval_prog(calc, "_add1()"), Err(InterpError::UndefinedFunction("_add1".to_string())));
+    }
+
+    #[test]
     fn function_composition() {
         let calc = &mut Calc::new();
         eval_prog(calc, "fun _add1 (_p1){ return _p1 + 1; }").unwrap();
