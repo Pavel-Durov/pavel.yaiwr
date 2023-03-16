@@ -43,11 +43,11 @@ CallableExpr -> Result<AstNode, ()>:
 // Functions
 
 ParamList -> Result<Vec<AstNode>, ()>:
-    ParamList ',' Id { combine($1.map_err(|_| ())?, $3.map_err(|_| ())?) }
+    ParamList ',' Id { append($1.map_err(|_| ())?, $3.map_err(|_| ())?) }
     | Id {  Ok(vec![$1.map_err(|_| ())?]) };
 
 ArgList -> Result<Vec<AstNode>, ()>:
-    ArgList ',' Expr { combine($1.map_err(|_| ())?, $3.map_err(|_| ())?) }
+    ArgList ',' Expr { append($1.map_err(|_| ())?, $3.map_err(|_| ())?) }
     | Expr {  Ok(vec![$1.map_err(|_| ())?]) }
     ;
 
@@ -100,7 +100,7 @@ Unmatched -> ():
 
 use crate::ast::AstNode;
 
-fn combine(mut lhs: Vec<AstNode>, rhs: AstNode ) -> Result<Vec<AstNode>, ()>{
+fn append(mut lhs: Vec<AstNode>, rhs: AstNode ) -> Result<Vec<AstNode>, ()>{
     lhs.push(rhs);
     Ok(lhs)
 }

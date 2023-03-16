@@ -4,28 +4,25 @@ mod tests {
 
     #[test]
     fn eval_mul_expression() {
-        let mut c = Calc::new();
-        let ast = c.from_str("2*2").unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode).unwrap(), Some(4));
+        let mut calc = Calc::new();
+        let ast = calc.from_str("2*2").unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
+        assert_eq!(calc.eval(&bytecode).unwrap(), Some(4));
     }
 
     #[test]
     fn eval_mul_expressions() {
-        let mut c = Calc::new();
-        let ast = c.from_str("2*2*2").unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode).unwrap(), Some(8));
+        let mut calc = Calc::new();
+        let ast = calc.from_str("2*2*2").unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
+        assert_eq!(calc.eval(&bytecode).unwrap(), Some(8));
     }
 
     #[test]
     fn mul_bytecode() {
-        let mut c = Calc::new();
-        let ast = c.from_str("1*2").unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
+        let calc = Calc::new();
+        let ast = calc.from_str("1*2").unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
         match bytecode.as_slice() {
             [first, second, third] => {
                 assert_eq!(first, &Instruction::Push { value: 1 });
@@ -42,9 +39,8 @@ mod tests {
         let mut c = Calc::new();
         let input = format!("{}*{}", u64::MAX, 2);
         let ast = c.from_str(input.as_str()).unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        c.eval(bytecode).unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
+        c.eval(&bytecode).unwrap();
     }
 
     #[test]
@@ -52,8 +48,7 @@ mod tests {
         let mut c = Calc::new();
         let input = format!("{}*{}", u64::MAX, 1);
         let ast = c.from_str(input.as_str()).unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        c.eval(bytecode).unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
+        c.eval(&bytecode).unwrap();
     }
 }

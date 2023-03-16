@@ -3,7 +3,7 @@ use std::{
     env, fs,
     io::{self, stdout, BufRead, Write},
 };
-use yaiwr::{err::InterpError, Calc};
+use yaiwr::{bytecode::to_bytecode, err::InterpError, Calc};
 
 fn main() {
     env_logger::init();
@@ -70,7 +70,7 @@ pub fn eval_line(input: &str, calc: &mut Calc) -> Result<Option<u64>, InterpErro
         Ok(ast_node) => {
             debug!("AST: {:?}", &ast_node);
             let bytecode = &mut vec![];
-            calc.to_bytecode(ast_node, bytecode);
+            to_bytecode(ast_node, bytecode);
             debug!("Bytecode: {:?}", &bytecode);
             match calc.eval(bytecode) {
                 Ok(result) => Ok(result),

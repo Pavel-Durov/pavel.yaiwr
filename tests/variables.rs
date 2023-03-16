@@ -6,9 +6,8 @@ mod tests {
     fn eval_prog(input: &str) -> Calc {
         let mut c = Calc::new();
         let ast = c.from_str(input).unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        c.eval(bytecode).unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
+        c.eval(&bytecode).unwrap();
         return c;
     }
 
@@ -17,7 +16,7 @@ mod tests {
         let c = eval_prog("let _a = 2;");
 
         match c.get_var("_a".to_string()).unwrap() {
-            StackValue::Variable(id, val) => assert_eq!(val, 2),
+            StackValue::Variable(_, val) => assert_eq!(val, 2),
             _ => panic!("!"),
         }
     }
@@ -25,7 +24,7 @@ mod tests {
     fn var_expression() {
         let c = eval_prog("let _b = (1+2*3);");
         match c.get_var("_a".to_string()).unwrap() {
-            StackValue::Variable(id, val) => assert_eq!(val, 7),
+            StackValue::Variable(_, val) => assert_eq!(val, 7),
             _ => panic!("!"),
         }
     }

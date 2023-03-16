@@ -4,47 +4,59 @@ mod tests {
 
     pub fn eval_prog(calc: &mut Calc, input: &str) -> Result<Option<u64>, InterpError> {
         let ast = calc.from_str(input).unwrap();
-        let bytecode = &mut vec![];
-        calc.to_bytecode(ast, bytecode);
-        return calc.eval(bytecode);
+        let bytecode = Calc::ast_to_bytecode(ast);
+        return calc.eval(&bytecode);
+    }
+
+    #[test]
+    fn function_call_err() {
+        let calc = &mut Calc::new();
+        eval_prog(calc, "fun _add1 (_p1){ return _p1 + 1; }").unwrap();
+        assert_eq!(eval_prog(calc, "_add1()"), Err(InterpError::EvalError("Unexpected number of function arguments. Expected: 1, Got: 0".to_string())));
+    }
+
+    #[test]
+    fn function_undefined_err() {
+        let calc = &mut Calc::new();
+        assert_eq!(eval_prog(calc, "_add1()"), Err(InterpError::UndefinedFunction("_add1".to_string())));
     }
 
     #[test]
     fn function_composition() {
-        let c = &mut Calc::new();
-        eval_prog(c, "fun _add1 (_p1){ return _p1 + 1; }").unwrap();
-        eval_prog(c, "fun _add2 (_p1){ return _p1 + 2; }").unwrap();
-        assert_eq!(eval_prog(c, "_add2(_add1(1))").unwrap().unwrap(), 4);
+        let calc = &mut Calc::new();
+        eval_prog(calc, "fun _add1 (_p1){ return _p1 + 1; }").unwrap();
+        eval_prog(calc, "fun _add2 (_p1){ return _p1 + 2; }").unwrap();
+        assert_eq!(eval_prog(calc, "_add2(_add1(1))").unwrap().unwrap(), 4);
     }
 
     #[test]
     fn function_multiple_params() {
-        let c = &mut Calc::new();
-        eval_prog(c, "fun _add (_p1, _p2, _p3){ return _p1 + _p2 +_p3; }").unwrap();
-        assert_eq!(eval_prog(c, "_add(1,2,3)").unwrap().unwrap(), 6);
+        let calc = &mut Calc::new();
+        eval_prog(calc, "fun _add (_p1, _p2, _p3){ return _p1 + _p2 +_p3; }").unwrap();
+        assert_eq!(eval_prog(calc, "_add(1,2,3)").unwrap().unwrap(), 6);
     }
 
     #[test]
     fn function_params_as_variables() {
-        let c = &mut Calc::new();
-        eval_prog(c, "let _x = 2;").unwrap();
-        eval_prog(c, "let _y = 3;").unwrap();
-        eval_prog(c, "fun _add (_arg1, _arg2){ return _arg1 + _arg2; }").unwrap();
-        assert_eq!(eval_prog(c, "_add(_x, _y)").unwrap().unwrap(), 5);
+        let calc = &mut Calc::new();
+        eval_prog(calc, "let _x = 2;").unwrap();
+        eval_prog(calc, "let _y = 3;").unwrap();
+        eval_prog(calc, "fun _add (_arg1, _arg2){ return _arg1 + _arg2; }").unwrap();
+        assert_eq!(eval_prog(calc, "_add(_x, _y)").unwrap().unwrap(), 5);
     }
 
     #[test]
     fn function_call_from_function_call() {
-        let c = &mut Calc::new();
-        eval_prog(c, "let _x = 2;").unwrap();
-        eval_prog(c, "let _y = 3;").unwrap();
+        let calc = &mut Calc::new();
+        eval_prog(calc, "let _x = 2;").unwrap();
+        eval_prog(calc, "let _y = 3;").unwrap();
         eval_prog(
-            c,
+            calc,
             "fun _add (_arg1, _arg2){ return _id(_arg1) + _id(_arg2); }",
         )
         .unwrap();
-        eval_prog(c, "fun _id (_arg1){ return _arg1; }").unwrap();
-        assert_eq!(eval_prog(c, "_add(_x, _y)").unwrap().unwrap(), 5);
+        eval_prog(calc, "fun _id (_arg1){ return _arg1; }").unwrap();
+        assert_eq!(eval_prog(calc, "_add(_x, _y)").unwrap().unwrap(), 5);
     }
 
     #[test]
@@ -52,10 +64,9 @@ mod tests {
         let calc = &mut Calc::new();
         let prog1 = "fun _some (){ return 2*2; }";
         let ast = calc.from_str(prog1).unwrap();
-        let bytecode = &mut vec![];
-        calc.to_bytecode(ast, bytecode);
-        calc.eval(bytecode).unwrap();
-        match bytecode.as_slice() {
+        let func_declare_bc = Calc::ast_to_bytecode(ast);
+        calc.eval(&func_declare_bc).unwrap();
+        match func_declare_bc.as_slice() {
             [first] => {
                 assert_eq!(
                     first,
@@ -81,10 +92,9 @@ mod tests {
         let calc = &mut Calc::new();
         let prog = "fun _add (_p1, _p2){ return _p1 + _p2 + 1; }";
         let ast = calc.from_str(prog).unwrap();
-        let bytecode = &mut vec![];
-        calc.to_bytecode(ast, bytecode);
-        calc.eval(bytecode).unwrap();
-        match bytecode.as_slice() {
+        let func_declare_bc = Calc::ast_to_bytecode(ast);
+        calc.eval(&func_declare_bc).unwrap();
+        match func_declare_bc.as_slice() {
             [first] => {
                 assert_eq!(
                     first,
@@ -116,9 +126,9 @@ mod tests {
         let calc = &mut Calc::new();
         let prog_func_declaration = "fun _add (_p1, _p2){ return _p1 + _p2; }";
         let ast = calc.from_str(prog_func_declaration).unwrap();
-        let func_declaration_bytecode = &mut vec![];
-        calc.to_bytecode(ast, func_declaration_bytecode);
-        match func_declaration_bytecode.as_slice() {
+        let func_declaration_bc = Calc::ast_to_bytecode(ast);
+        calc.eval(&func_declaration_bc).unwrap();
+        match func_declaration_bc.as_slice() {
             [first] => {
                 assert_eq!(
                     first,
@@ -141,12 +151,12 @@ mod tests {
             }
             _ => panic!("expected bytecodes to be not empty!"),
         }
-        calc.eval(func_declaration_bytecode).unwrap();
+
         let prog_func_call = "_add(1,2)";
         let ast = calc.from_str(prog_func_call).unwrap();
-        let func_call_bytecode = &mut vec![];
-        calc.to_bytecode(ast, func_call_bytecode);
-        match func_call_bytecode.as_slice() {
+        let func_call_bc = Calc::ast_to_bytecode(ast);
+        calc.eval(&func_call_bc).unwrap();
+        match func_call_bc.as_slice() {
             [first] => {
                 assert_eq!(
                     first,
@@ -168,9 +178,9 @@ mod tests {
         let calc = &mut Calc::new();
         let prog_func_declaration = "fun _two_plus_two (){ return (2+2); }";
         let ast = calc.from_str(prog_func_declaration).unwrap();
-        let bytecode = &mut vec![];
-        calc.to_bytecode(ast, bytecode);
-        match bytecode.as_slice() {
+        let func_declare_bc = Calc::ast_to_bytecode(ast);
+        calc.eval(&func_declare_bc).unwrap();
+        match func_declare_bc.as_slice() {
             [first] => {
                 assert_eq!(
                     first,
@@ -191,9 +201,9 @@ mod tests {
         }
         let prog_func_call = "_two_plus_two()";
         let ast = calc.from_str(prog_func_call).unwrap();
-        let bytecode = &mut vec![];
-        calc.to_bytecode(ast, bytecode);
-        match bytecode.as_slice() {
+        let func_call_bc = Calc::ast_to_bytecode(ast);
+        calc.eval(&func_call_bc).unwrap();
+        match func_call_bc.as_slice() {
             [first] => {
                 assert_eq!(
                     first,

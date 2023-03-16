@@ -4,28 +4,25 @@ mod tests {
 
     #[test]
     fn eval_add_expression() {
-        let mut c = Calc::new();
-        let ast = c.from_str("2+2").unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode).unwrap(), Some(4));
+        let mut calc = Calc::new();
+        let ast = calc.from_str("2+2").unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
+        assert_eq!(calc.eval(&bytecode).unwrap(), Some(4));
     }
 
     #[test]
     fn eval_add_expressions() {
-        let mut c = Calc::new();
-        let ast = c.from_str("2+2+2").unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode).unwrap(), Some(6));
+        let mut calc = Calc::new();
+        let ast = calc.from_str("2+2+2").unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
+        assert_eq!(calc.eval(&bytecode).unwrap(), Some(6));
     }
 
     #[test]
     fn add_bytecode() {
-        let mut c = Calc::new();
-        let ast = c.from_str("1+2").unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
+        let calc = Calc::new();
+        let ast = calc.from_str("1+2").unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
         match bytecode.as_slice() {
             [first, second, third] => {
                 assert_eq!(first, &Instruction::Push { value: 1 });
@@ -39,21 +36,19 @@ mod tests {
     #[test]
     #[should_panic(expected = "overflowed")]
     fn add_overflow_max_u64() {
-        let mut c = Calc::new();
+        let mut calc = Calc::new();
         let input = format!("{}+{}", u64::MAX, 1);
-        let ast = c.from_str(input.as_str()).unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        c.eval(bytecode).unwrap();
+        let ast = calc.from_str(input.as_str()).unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
+        calc.eval(&bytecode).unwrap();
     }
 
     #[test]
     fn add_no_overflow() {
-        let mut c = Calc::new();
+        let mut calc = Calc::new();
         let input = format!("{}+{}", u64::MAX - 1, 1);
-        let ast = c.from_str(input.as_str()).unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        c.eval(bytecode).unwrap();
+        let ast = calc.from_str(input.as_str()).unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
+        calc.eval(&bytecode).unwrap();
     }
 }

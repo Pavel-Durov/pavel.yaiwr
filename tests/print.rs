@@ -6,26 +6,23 @@ mod tests {
     fn eval_println_statement_add() {
         let mut c = Calc::new();
         let ast = c.from_str("println(2+2);").unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode).unwrap(), None);
+        let bytecode = Calc::ast_to_bytecode(ast);
+        assert_eq!(c.eval(&bytecode).unwrap(), None);
     }
 
     #[test]
     fn eval_println_statement_mul() {
         let mut c = Calc::new();
         let ast = c.from_str("println(2*2);").unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode).unwrap(), None);
+        let bytecode = Calc::ast_to_bytecode(ast);
+        assert_eq!(c.eval(&bytecode).unwrap(), None);
     }
 
     #[test]
     fn println_statement_numeric_bytecode() {
-        let mut c = Calc::new();
-        let ast = c.from_str("println(1);").unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
+        let calc = Calc::new();
+        let ast = calc.from_str("println(1);").unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
         match bytecode.as_slice() {
             [first, second] => {
                 assert_eq!(first, &Instruction::Push { value: 1 });
@@ -37,10 +34,9 @@ mod tests {
 
     #[test]
     fn print_statement_add_bytecode() {
-        let mut c = Calc::new();
-        let ast = c.from_str("println (1+1);").unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
+        let calc = Calc::new();
+        let ast = calc.from_str("println (1+1);").unwrap();
+        let bytecode = Calc::ast_to_bytecode(ast);
         match bytecode.as_slice() {
             [c1, c2, c3, c4] => {
                 assert_eq!(c1, &Instruction::Push { value: 1 });
@@ -57,18 +53,16 @@ mod tests {
     fn eval_println_statement_add_parsing_error() {
         let mut c = Calc::new();
         let ast = c.from_str("println 2+2").unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode).unwrap(), None);
+        let bytecode = Calc::ast_to_bytecode(ast);
+        assert_eq!(c.eval(&bytecode).unwrap(), None);
     }
     #[test]
     #[should_panic]
     fn eval_println_statement_mul_parsing_error() {
         let mut c = Calc::new();
         let ast = c.from_str("println 2*2").unwrap();
-        let bytecode = &mut vec![];
-        c.to_bytecode(ast, bytecode);
-        assert_eq!(c.eval(bytecode).unwrap(), None);
+        let bytecode = Calc::ast_to_bytecode(ast);
+        assert_eq!(c.eval(&bytecode).unwrap(), None);
     }
 
     #[test]

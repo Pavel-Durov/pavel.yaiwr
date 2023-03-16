@@ -1,3 +1,4 @@
+use bytecode::to_bytecode;
 use instruction::Instruction;
 use log::debug;
 use lrlex::{lrlex_mod, DefaultLexerTypes};
@@ -8,6 +9,7 @@ lrlex_mod!("calc.l");
 lrpar_mod!("calc.y");
 
 pub mod ast;
+pub mod bytecode;
 pub mod err;
 pub mod instruction;
 
@@ -20,7 +22,6 @@ pub enum StackValue
     Value(u64),
     Variable(String, u64)
 }
-
 #[derive(Debug)]
 pub struct Calc {
     // var_store: HashMap<String, u64>,
@@ -93,87 +94,10 @@ impl Calc {
             .collect::<Vec<String>>();
         return msgs.join("\n");
     }
-
-    fn function_ast_to_bytecode_params(
-        &self,
-        params: Vec<AstNode>,
-    ) -> Result<Vec<String>, InterpError> {
-        let mut bytecode = vec![];
-        for p in params {
-            match p {
-                AstNode::ID { value } => bytecode.push(value),
-                _ => {
-                    return Err(InterpError::EvalError(
-                        "Enexpected function parameter type".to_string(),
-                    ))
-                }
-            }
-        }
-        return Ok(bytecode);
-    }
-
-    pub fn to_bytecode(&mut self, ast_node: AstNode, prog: &mut Vec<Instruction>) {
-        match ast_node {
-            AstNode::Return { block: body } => {
-                let bytecode = &mut vec![];
-                self.to_bytecode(*body, bytecode);
-                prog.push(Instruction::Return {
-                    block: bytecode.to_vec(),
-                });
-            }
-            AstNode::FunctionCall { id, args } => {
-                let mut args_bytecode = vec![];
-
-                for a in args {
-                    let bytecode = &mut vec![];
-                    self.to_bytecode(a, bytecode);
-                    args_bytecode.push(bytecode.to_vec());
-                }
-                prog.push(Instruction::FunctionCall {
-                    id,
-                    args: args_bytecode,
-                })
-            }
-            AstNode::Function {
-                id,
-                params,
-                block: body,
-            } => {
-                let bytecode = &mut vec![];
-                self.to_bytecode(*body, bytecode);
-                let parsed_params = self.function_ast_to_bytecode_params(params);
-                match parsed_params {
-                    Ok(p) => {
-                        prog.push(Instruction::Function {
-                            id,
-                            block: bytecode.to_vec(),
-                            params: p,
-                        });
-                    }
-                    Err(..) => todo!(),
-                }
-            }
-            AstNode::Add { lhs, rhs } => {
-                self.to_bytecode(*lhs, prog);
-                self.to_bytecode(*rhs, prog);
-                prog.push(Instruction::Add {})
-            }
-            AstNode::Mul { lhs, rhs } => {
-                self.to_bytecode(*lhs, prog);
-                self.to_bytecode(*rhs, prog);
-                prog.push(Instruction::Mul {})
-            }
-            AstNode::Number { value } => prog.push(Instruction::Push { value: value }),
-            AstNode::PrintLn { rhs } => {
-                self.to_bytecode(*rhs, prog);
-                prog.push(Instruction::PrintLn {})
-            }
-            AstNode::Assign { id, rhs } => {
-                self.to_bytecode(*rhs, prog);
-                prog.push(Instruction::Assign { id })
-            }
-            AstNode::ID { value } => prog.push(Instruction::Load { id: value }),
-        }
+    pub fn ast_to_bytecode(ast: AstNode) -> Vec<Instruction> {
+        let bytecode = &mut vec![];
+        to_bytecode(ast, bytecode);
+        bytecode.to_vec()
     }
 
     fn eval_function_args(
@@ -182,8 +106,7 @@ impl Calc {
     ) -> Result<Vec<u64>, InterpError> {
         let mut result = vec![];
         for arg_set in args {
-            let evaluated = self.eval(arg_set);
-            match evaluated {
+            match self.eval(arg_set) {
                 Ok(Some(x)) => result.push(x),
                 Ok(None) => {}
                 Err(e) => return Err(e),
@@ -214,9 +137,12 @@ impl Calc {
                         args.len()
                     )));
                 }
-                // TODO: Implement function scope. Once we have recursion support this variable setup wont work!
+                // TODO: Implement function scope/stack based variables
                 for (i, p) in params.iter().enumerate() {
-                    self.stack.push(StackValue::Variable(p.to_string(), args[i]));
+                    // self.var_store.insert(p.to_string(), args[i]);
+                    let var = StackValue::Variable(p.to_string(), args[i]);
+                    // self.set_var(StackValue::Variable(p.to_string(), args[i]))
+                    self.stack.push(var);
                 }
                 return self.eval(&body.clone());
             }
