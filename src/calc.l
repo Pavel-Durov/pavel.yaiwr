@@ -15,5 +15,7 @@ println "PRINT_LN"
 let "ASSIGN"
 fun "FUNCTION"
 return "RETURN"
-[\t\n ]+ ;
+\n "NL"
+(//|#)[^\r\n]*|/\*([^\*]|\*[^/]|\*\*)*\*/ ;
+[\n\r\t ] ;
 . "UNMATCHED"

@@ -24,7 +24,7 @@ pub enum AstNode {
     Function {
         id: String,
         params: Vec<AstNode>,
-        block: Box<AstNode>,
+        block: Vec<AstNode>,
     },
     FunctionCall {
         id: String,

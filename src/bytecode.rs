@@ -26,15 +26,25 @@ fn function_ast_params_to_vec(params: Vec<AstNode>) -> Vec<String> {
 fn function_declaration(
     id: String,
     params: Vec<AstNode>,
-    block: AstNode,
+    block: Vec<AstNode>,
     prog: &mut Vec<Instruction>,
 ) {
-    let bytecode = &mut vec![];
-    to_bytecode(block, bytecode);
+    let bytecodes = &mut vec![];
+
+    for b in block{
+        let bytecode = &mut vec![];
+        to_bytecode(b, bytecode);
+        for bc in bytecode{
+            bytecodes.push(bc.clone());
+        }
+    }
+
+    
+    
     let parsed_params = function_ast_params_to_vec(params);
     prog.push(Instruction::Function {
         id,
-        block: bytecode.to_vec(),
+        block: bytecodes.to_vec(),
         params: parsed_params,
     });
 }
@@ -49,7 +59,7 @@ pub fn to_bytecode(ast_node: AstNode, prog: &mut Vec<Instruction>) {
             });
         }
         AstNode::FunctionCall { id, args } => function_call(id, args, prog),
-        AstNode::Function { id, params, block } => function_declaration(id, params, *block, prog),
+        AstNode::Function { id, params, block } => function_declaration(id, params, block, prog),
         AstNode::Add { lhs, rhs } => {
             to_bytecode(*lhs, prog);
             to_bytecode(*rhs, prog);

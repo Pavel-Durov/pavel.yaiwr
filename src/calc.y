@@ -40,6 +40,17 @@ CallableExpr -> Result<AstNode, ()>:
     | Id { $1 }
     | FunctionCall { $1 };
 
+// Statements
+
+Statement -> Result<AstNode, ()>:
+    Expr {$1};
+
+StatementList -> Result<Vec<AstNode>, ()>:
+    StatementList ";" Statement { append($1.map_err(|_| ())?, $3.map_err(|_| ())?) }
+    | Statement { Ok(vec![$1.map_err(|_| ())?]) }
+    ;
+
+
 // Functions
 
 ParamList -> Result<Vec<AstNode>, ()>:
@@ -52,20 +63,20 @@ ArgList -> Result<Vec<AstNode>, ()>:
     ;
 
 FunctionDeclaration -> Result<AstNode, ()>:
-    "FUNCTION" "ID" "(" ")" "{" Expr "}" { 
+    "FUNCTION" "ID" "(" ")" "{" StatementList "}" { 
         let id = $2.map_err(|_| ())?;
         Ok(AstNode::Function{ 
             id: $lexer.span_str(id.span()).to_string(),
             params: vec![],
-            block: Box::new($6?)
+            block: $6?
         }) 
      }
-    | "FUNCTION" "ID" "(" ParamList ")" "{" Expr "}" { 
+    | "FUNCTION" "ID" "(" ParamList ")" "{" StatementList "}" { 
         let id = $2.map_err(|_| ())?;
         Ok(AstNode::Function{ 
             id: $lexer.span_str(id.span()).to_string(),
             params: $4.map_err(|_| ())?,
-            block: Box::new($7?)
+            block: $7?
         }) 
      };
 
