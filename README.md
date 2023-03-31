@@ -54,6 +54,25 @@ $ run_docker_ci_job # optional (--prune)
 
 ## Langugage Spec(ish)
 
+### Comments
+
+YAIWR comments can be used to explain the YAIWR code. 
+YAIWR comments can be used to prevent execution when testing alternative code.
+
+Convention:
+
+1. Comments should start with `//` prefix
+2. Comments can be ONLY single-lines
+
+Example:
+
+```
+let _a = 4; // let _a = 5;
+// let _a = 5;
+println(_a);
+```
+In this example, the output will be `5`.
+
 ### Statements
 
 `println` - Prints to the standard output, with a new line

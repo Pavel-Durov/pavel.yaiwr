@@ -1,5 +1,5 @@
 let _x = 2;
 let _y = 3;
-fun _add (_arg1, _arg2){ return _id(_arg1) + _id(_arg2); }
-fun _id (_arg1){ return _arg1; }
-println(_add(_x, _y));
+fun add (_arg1, _arg2){ return id(_arg1); + id(_arg2); }
+fun id (_arg1){ return _arg1; }
+println(add(_x, _y););

@@ -16,4 +16,5 @@ return "RETURN"
 _[a-zA-Z0-9_]+ "T_VARIABLE"
 [a-zA-Z0-9_]+ "FUNC_ID" 
 [\t\n ]+ ;
+//.*\n ;
 . "UNMATCHED"
