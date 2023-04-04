@@ -1,5 +1,5 @@
 use bytecode::block_to_bytecode;
-use instruction::{Instruction, StackValue};
+use instruction::{BinaryOp, Instruction, StackValue};
 use log::debug;
 use lrlex::{lrlex_mod, DefaultLexerTypes};
 use lrpar::{lrpar_mod, LexParseError, NonStreamingLexer};
@@ -125,81 +125,48 @@ impl Calc {
         }
     }
 
-    fn eval_boolean_stmt(
+    fn eval_binary_op(
         &mut self,
-        instruction: Instruction,
+        op: &BinaryOp,
+        scope: &mut Scope,
     ) -> Result<Option<StackValue>, InterpError> {
-        let op1 = self.stack_pop();
-        if let Ok(StackValue::Integer(op1_val)) = op1 {
-            let op2 = self.stack_pop();
-            if let Ok(StackValue::Integer(op2_val)) = op2 {
-                let val;
-                if instruction == Instruction::GreaterThan {
-                    val = StackValue::Boolean(op2_val > op1_val);
-                } else if instruction == Instruction::LessThan {
-                    val = StackValue::Boolean(op2_val < op1_val);
-                } else {
-                    return Err(InterpError::EvalError(
-                        format!("Unexpected boolean instruction {}", instruction).to_string(),
-                    ));
-                }
-                self.stack_push(val);
-                Ok(Some(val))
-            } else {
-                return Err(InterpError::EvalError(format!(
-                    "Invalid operand {} given for {} operation!",
-                    op1.unwrap(),
-                    instruction
-                )));
+        let val = match op {
+            BinaryOp::LessThan => {
+                let op1 = self.stack_pop()?.as_int()?;
+                let op2 = self.stack_pop()?.as_int()?;
+                StackValue::Boolean(op2 < op1)
             }
-        } else {
-            return Err(InterpError::EvalError(format!(
-                "Invalid operand {} given for {} operation!",
-                op1.unwrap(),
-                instruction
-            )));
-        }
+            BinaryOp::GreaterThan => {
+                let op1 = self.stack_pop()?.as_int()?;
+                let op2 = self.stack_pop()?.as_int()?;
+                StackValue::Boolean(op1 < op2)
+            }
+            BinaryOp::Add => {
+                let op1 = self.stack_pop()?.as_int()?;
+                let op2 = self.stack_pop()?.as_int()?;
+                StackValue::Integer(
+                    op1.checked_add(op2)
+                        .ok_or(InterpError::Numeric("overflowed".to_string()))?,
+                )
+            }
+            BinaryOp::Mul => {
+                let op1 = self.stack_pop()?.as_int()?;
+                let op2 = self.stack_pop()?.as_int()?;
+                StackValue::Integer(
+                    op1.checked_mul(op2)
+                        .ok_or(InterpError::Numeric("overflowed".to_string()))?,
+                )
+            }
+            BinaryOp::Assign { id } => {
+                let val = self.stack_pop()?;
+                scope.var_store.insert(id.to_string(), val);
+                val
+            }
+        };
+        self.stack_push(val);
+        Ok(Some(val))
     }
 
-    fn eval_numeric_stmt(
-        &mut self,
-        instruction: Instruction,
-    ) -> Result<Option<StackValue>, InterpError> {
-        let op1 = self.stack_pop();
-        if let Ok(StackValue::Integer(op1_val)) = op1 {
-            let op2 = self.stack_pop();
-            if let Ok(StackValue::Integer(op2_val)) = op2 {
-                let val;
-                if instruction == Instruction::Add {
-                    val = op1_val
-                        .checked_add(op2_val)
-                        .ok_or(InterpError::Numeric("overflowed".to_string()))?;
-                } else if instruction == Instruction::Mul {
-                    val = op1_val
-                        .checked_mul(op2_val)
-                        .ok_or(InterpError::Numeric("overflowed".to_string()))?;
-                } else {
-                    return Err(InterpError::EvalError(
-                        format!("Unexpected numeric instruction {}", instruction).to_string(),
-                    ));
-                }
-                self.stack_push(StackValue::Integer(val));
-                Ok(Some(StackValue::Integer(val)))
-            } else {
-                return Err(InterpError::EvalError(format!(
-                    "Invalid operand {} given numeric {} operation!",
-                    op1.unwrap(),
-                    instruction
-                )));
-            }
-        } else {
-            return Err(InterpError::EvalError(format!(
-                "Invalid operand {} given numeric {} operation!",
-                op1.unwrap(),
-                instruction
-            )));
-        }
-    }
     pub fn eval(
         &mut self,
         instructions: &Vec<Instruction>,
@@ -246,25 +213,12 @@ impl Calc {
                 Instruction::PrintLn => {
                     println!("{}", self.stack.pop().unwrap());
                 }
-                Instruction::Mul {} => {
-                    self.eval_numeric_stmt(Instruction::Mul)?;
-                }
-                Instruction::Add {} => {
-                    self.eval_numeric_stmt(Instruction::Add)?;
-                }
-                Instruction::Assign { id } => {
-                    let val = self.stack_pop()?;
-                    scope.var_store.insert(id.to_string(), val);
-                }
                 Instruction::Load { id } => {
                     let val = scope.get_var(id)?;
                     self.stack_push(*val);
                 }
-                Instruction::LessThan => {
-                    self.eval_boolean_stmt(Instruction::LessThan)?;
-                }
-                Instruction::GreaterThan => {
-                    self.eval_boolean_stmt(Instruction::GreaterThan)?;
+                Instruction::BinaryOp { op } => {
+                    self.eval_binary_op(op, scope)?;
                 }
             }
         }

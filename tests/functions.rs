@@ -2,7 +2,7 @@
 mod tests {
     use yaiwr::{
         err::InterpError,
-        instruction::{Instruction, StackValue},
+        instruction::{BinaryOp, Instruction, StackValue},
         scope::Scope,
         Calc,
     };
@@ -90,7 +90,7 @@ mod tests {
                                 Instruction::Push {
                                     value: StackValue::Integer(2)
                                 },
-                                Instruction::Mul
+                                Instruction::BinaryOp { op: BinaryOp::Mul }
                             ]
                         }]
                     }
@@ -122,11 +122,11 @@ mod tests {
                                 Instruction::Load {
                                     id: "_p2".to_string()
                                 },
-                                Instruction::Add,
+                                Instruction::BinaryOp { op: BinaryOp::Add },
                                 Instruction::Push {
                                     value: StackValue::Integer(1)
                                 },
-                                Instruction::Add
+                                Instruction::BinaryOp { op: BinaryOp::Add },
                             ]
                         }]
                     }
@@ -158,7 +158,7 @@ mod tests {
                                 Instruction::Load {
                                     id: "_p2".to_string()
                                 },
-                                Instruction::Add
+                                Instruction::BinaryOp { op: BinaryOp::Add },
                             ]
                         }]
                     }
@@ -214,7 +214,7 @@ mod tests {
                                 Instruction::Push {
                                     value: StackValue::Integer(2)
                                 },
-                                Instruction::Add
+                                Instruction::BinaryOp { op: BinaryOp::Add },
                             ]
                         }]
                     }

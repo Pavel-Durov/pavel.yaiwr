@@ -1,6 +1,6 @@
 use crate::{
     ast::AstNode,
-    instruction::{Instruction, StackValue},
+    instruction::{BinaryOp, Instruction, StackValue},
 };
 
 fn function_call(id: String, args: Vec<AstNode>, prog: &mut Vec<Instruction>) {
@@ -64,12 +64,12 @@ pub fn to_bytecode(ast_node: AstNode, prog: &mut Vec<Instruction>) {
         AstNode::Add { lhs, rhs } => {
             to_bytecode(*lhs, prog);
             to_bytecode(*rhs, prog);
-            prog.push(Instruction::Add {})
+            prog.push(Instruction::BinaryOp { op: BinaryOp::Add })
         }
         AstNode::Mul { lhs, rhs } => {
             to_bytecode(*lhs, prog);
             to_bytecode(*rhs, prog);
-            prog.push(Instruction::Mul {})
+            prog.push(Instruction::BinaryOp { op: BinaryOp::Mul })
         }
         AstNode::Number { value } => prog.push(Instruction::Push {
             value: StackValue::Integer(value),
@@ -80,7 +80,9 @@ pub fn to_bytecode(ast_node: AstNode, prog: &mut Vec<Instruction>) {
         }
         AstNode::Assign { id, rhs } => {
             to_bytecode(*rhs, prog);
-            prog.push(Instruction::Assign { id })
+            prog.push(Instruction::BinaryOp {
+                op: BinaryOp::Assign { id },
+            })
         }
         AstNode::ID { value } => prog.push(Instruction::Load { id: value }),
         AstNode::Boolean { value } => prog.push(Instruction::Push {
@@ -89,12 +91,16 @@ pub fn to_bytecode(ast_node: AstNode, prog: &mut Vec<Instruction>) {
         AstNode::GreaterThan { lhs, rhs } => {
             to_bytecode(*lhs, prog);
             to_bytecode(*rhs, prog);
-            prog.push(Instruction::GreaterThan {})
+            prog.push(Instruction::BinaryOp {
+                op: BinaryOp::GreaterThan {},
+            })
         }
         AstNode::LessThan { lhs, rhs } => {
             to_bytecode(*lhs, prog);
             to_bytecode(*rhs, prog);
-            prog.push(Instruction::LessThan {})
+            prog.push(Instruction::BinaryOp {
+                op: BinaryOp::LessThan {},
+            })
         }
     }
 }

@@ -2,7 +2,7 @@
 mod tests {
     use yaiwr::{
         ast::AstNode,
-        instruction::{Instruction, StackValue},
+        instruction::{BinaryOp, Instruction, StackValue},
         Calc,
     };
 
@@ -50,20 +50,25 @@ mod tests {
         let ast = calc.from_str("1 > 2").unwrap();
         let bytecode = Calc::ast_to_bytecode(ast);
         match bytecode.as_slice() {
-            [first, second, third] => {
+            [bc1, bc2, bc3] => {
                 assert_eq!(
-                    first,
+                    bc1,
                     &Instruction::Push {
                         value: StackValue::Integer(1)
                     }
                 );
                 assert_eq!(
-                    second,
+                    bc2,
                     &Instruction::Push {
                         value: StackValue::Integer(2)
                     }
                 );
-                assert_eq!(third, &Instruction::GreaterThan);
+                assert_eq!(
+                    bc3,
+                    &Instruction::BinaryOp {
+                        op: BinaryOp::GreaterThan
+                    }
+                );
             }
             _ => panic!("expected bytecodes to be not empty!"),
         }
@@ -87,12 +92,17 @@ mod tests {
                         value: StackValue::Integer(2)
                     }
                 );
-                assert_eq!(bc3, &Instruction::LessThan);
+                assert_eq!(
+                    bc3,
+                    &Instruction::BinaryOp {
+                        op: BinaryOp::LessThan
+                    }
+                );
             }
             _ => panic!("expected bytecodes to be not empty!"),
         }
     }
-    
+
     #[test]
     fn bool_less_than_expression_bc() {
         let calc = &mut Calc::new();
@@ -112,14 +122,19 @@ mod tests {
                         value: StackValue::Integer(2)
                     }
                 );
-                assert_eq!(bc3, &Instruction::Add);
+                assert_eq!(bc3, &Instruction::BinaryOp { op: BinaryOp::Add });
                 assert_eq!(
                     bc4,
                     &Instruction::Push {
                         value: StackValue::Integer(4)
                     }
                 );
-                assert_eq!(bc5, &Instruction::LessThan);
+                assert_eq!(
+                    bc5,
+                    &Instruction::BinaryOp {
+                        op: BinaryOp::LessThan
+                    }
+                );
             }
             _ => panic!("expected bytecodes to be not empty!"),
         }

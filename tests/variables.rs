@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use yaiwr::{
-        instruction::{Instruction, StackValue},
+        instruction::{BinaryOp, Instruction, StackValue},
         Calc,
     };
 
@@ -20,8 +20,10 @@ mod tests {
                 );
                 assert_eq!(
                     second,
-                    &Instruction::Assign {
-                        id: "_ABCDabc123".to_string()
+                    &Instruction::BinaryOp {
+                        op: BinaryOp::Assign {
+                            id: "_ABCDabc123".to_string()
+                        }
                     }
                 );
             }

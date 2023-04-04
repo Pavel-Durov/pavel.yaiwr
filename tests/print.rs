@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use yaiwr::{
-        instruction::{Instruction, StackValue},
+        instruction::{BinaryOp, Instruction, StackValue},
         Calc,
     };
 
@@ -43,7 +43,7 @@ mod tests {
                         value: StackValue::Integer(1)
                     }
                 );
-                assert_eq!(c3, &Instruction::Add {});
+                assert_eq!(c3, &Instruction::BinaryOp { op: BinaryOp::Add });
                 assert_eq!(c4, &Instruction::PrintLn {});
             }
             _ => panic!("expected bytecodes to be not empty!"),
