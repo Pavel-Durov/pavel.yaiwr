@@ -56,6 +56,41 @@ $ run_docker_ci_job # optional (--prune)
 
 ## Langugage Spec(ish)
 
+### Types
+#### Numbets
+
+Integers are supported as numeric values. 
+
+Integers are stored as whole numbers as Rust `u64` constant for the 64-bit unsigned integers.
+
+Example:
+```
+let _a = 123;
+```
+
+#### Booleans
+
+Booleans represents a value, which could be `true` or `false`. 
+
+Example:
+```
+let _t = true;
+let _f = false;
+```
+#### Boolean Comparison Operators
+
+| Symbol |  Meaning  | Example |
+|:-----|:--------:|------:|
+| >   | Greater than | `1 > 2`|
+| <   |  Less than  a| `2 > 1`|
+
+Example:
+```
+(1+2) > 3 # false
+1000 > 42 # true
+```
+
+
 ### Comments
 
 YAIWR comments can be used to explain the YAIWR code. 
