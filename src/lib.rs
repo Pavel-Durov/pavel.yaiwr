@@ -125,6 +125,77 @@ impl Calc {
         }
     }
 
+    fn eval_boolean_stmt(
+        &mut self,
+        instruction: Instruction,
+    ) -> Result<Option<StackValue>, InterpError> {
+        let op1 = self.stack_pop();
+        if let Ok(StackValue::Integer(op1_val)) = op1 {
+            let op2 = self.stack_pop();
+            if let Ok(StackValue::Integer(op2_val)) = op2 {
+                let val;
+                if instruction == Instruction::GreaterThan {
+                    val = StackValue::Boolean(op2_val > op1_val);
+                } else if instruction == Instruction::LessThan {
+                    val = StackValue::Boolean(op2_val < op1_val);
+                } else {
+                    return Err(InterpError::EvalError(
+                        format!("Unexpected booelan instruction").to_string(),
+                    ));
+                }
+                self.stack_push(val);
+                Ok(Some(val))
+            } else {
+                return Err(InterpError::EvalError(format!(
+                    "Invalid operand {} given for boolean < operation!",
+                    op1.unwrap()
+                )));
+            }
+        } else {
+            return Err(InterpError::EvalError(format!(
+                "Invalid operand {} given for boolean > operation!",
+                op1.unwrap()
+            )));
+        }
+    }
+
+    fn eval_numeric_stmt(
+        &mut self,
+        instruction: Instruction,
+    ) -> Result<Option<StackValue>, InterpError> {
+        let op1 = self.stack_pop();
+        if let Ok(StackValue::Integer(op1_val)) = op1 {
+            let op2 = self.stack_pop();
+            if let Ok(StackValue::Integer(op2_val)) = op2 {
+                let val;
+                if instruction == Instruction::Add {
+                    val = op1_val
+                        .checked_add(op2_val)
+                        .ok_or(InterpError::Numeric("overflowed".to_string()))?;
+                } else if instruction == Instruction::Mul {
+                    val = op1_val
+                        .checked_mul(op2_val)
+                        .ok_or(InterpError::Numeric("overflowed".to_string()))?;
+                } else {
+                    return Err(InterpError::EvalError(
+                        format!("Unexpected numeric instruction").to_string(),
+                    ));
+                }
+                self.stack_push(StackValue::Integer(val));
+                Ok(Some(StackValue::Integer(val)))
+            } else {
+                return Err(InterpError::EvalError(format!(
+                    "Invalid operand {} given for mul operation!",
+                    op1.unwrap()
+                )));
+            }
+        } else {
+            return Err(InterpError::EvalError(format!(
+                "Invalid operand {} given for mul operation!",
+                op1.unwrap()
+            )));
+        }
+    }
     pub fn eval(
         &mut self,
         instructions: &Vec<Instruction>,
@@ -172,59 +243,10 @@ impl Calc {
                     println!("{}", self.stack.pop().unwrap());
                 }
                 Instruction::Mul {} => {
-                    // let val = self
-                    //     .stack_pop()?
-                    //     .checked_mul(self.stack_pop()?)
-                    //     .ok_or(InterpError::Numeric("overflowed".to_string()))?;
-                    // self.stack_push(val);
-                    let op1 = self.stack_pop();
-                    if let Ok(StackValue::Integer(op1_val)) = op1 {
-                        let op2 = self.stack_pop();
-                        if let Ok(StackValue::Integer(op2_val)) = op2 {
-                            let val = op1_val
-                                .checked_mul(op2_val)
-                                .ok_or(InterpError::Numeric("overflowed".to_string()))?;
-                            self.stack_push(StackValue::Integer(val));
-                        } else {
-                            return Err(InterpError::EvalError(format!(
-                                "Invalid operand {} given for mul operation!",
-                                op1.unwrap()
-                            )));
-                        }
-                    } else {
-                        return Err(InterpError::EvalError(format!(
-                            "Invalid operand {} given for mul operation!",
-                            op1.unwrap()
-                        )));
-                    }
+                    self.eval_numeric_stmt(Instruction::Mul)?;
                 }
                 Instruction::Add {} => {
-                    // let val = self
-                    //     .stack_pop();?
-                    //     .checked_add(self.stack_pop()?)
-                    //     .ok_or(InterpError::Numeric("overflowed".to_string()))?;
-                    // self.stack_push(val);
-
-                    let op1 = self.stack_pop();
-                    if let Ok(StackValue::Integer(op1_val)) = op1 {
-                        let op2 = self.stack_pop();
-                        if let Ok(StackValue::Integer(op2_val)) = op2 {
-                            let val = op1_val
-                                .checked_add(op2_val)
-                                .ok_or(InterpError::Numeric("overflowed".to_string()))?;
-                            self.stack_push(StackValue::Integer(val));
-                        } else {
-                            return Err(InterpError::EvalError(format!(
-                                "Invalid operand {} given for add operation!",
-                                op1.unwrap()
-                            )));
-                        }
-                    } else {
-                        return Err(InterpError::EvalError(format!(
-                            "Invalid operand {} given for add operation!",
-                            op1.unwrap()
-                        )));
-                    }
+                    self.eval_numeric_stmt(Instruction::Add)?;
                 }
                 Instruction::Assign { id } => {
                     let val = self.stack_pop()?;
@@ -235,42 +257,10 @@ impl Calc {
                     self.stack_push(*val);
                 }
                 Instruction::LessThan => {
-                    let op1 = self.stack_pop();
-                    if let Ok(StackValue::Integer(op1_val)) = op1 {
-                        let op2 = self.stack_pop();
-                        if let Ok(StackValue::Integer(op2_val)) = op2 {
-                            self.stack_push(StackValue::Boolean(op2_val < op1_val));
-                        } else {
-                            return Err(InterpError::EvalError(format!(
-                                "Invalid operand {} given for boolean < operation!",
-                                op1.unwrap()
-                            )));
-                        }
-                    } else {
-                        return Err(InterpError::EvalError(format!(
-                            "Invalid operand {} given for add operation!",
-                            op1.unwrap()
-                        )));
-                    }
+                    self.eval_boolean_stmt(Instruction::LessThan)?;
                 }
                 Instruction::GreaterThan => {
-                    let op1 = self.stack_pop();
-                    if let Ok(StackValue::Integer(op1_val)) = op1 {
-                        let op2 = self.stack_pop();
-                        if let Ok(StackValue::Integer(op2_val)) = op2 {
-                            self.stack_push(StackValue::Boolean(op2_val > op1_val));
-                        } else {
-                            return Err(InterpError::EvalError(format!(
-                                "Invalid operand {} given for boolean < operation!",
-                                op1.unwrap()
-                            )));
-                        }
-                    } else {
-                        return Err(InterpError::EvalError(format!(
-                            "Invalid operand {} given for boolean > operation!",
-                            op1.unwrap()
-                        )));
-                    }
+                    self.eval_boolean_stmt(Instruction::GreaterThan)?;
                 }
             }
         }
