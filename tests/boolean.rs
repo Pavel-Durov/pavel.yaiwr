@@ -92,6 +92,7 @@ mod tests {
             _ => panic!("expected bytecodes to be not empty!"),
         }
     }
+    
     #[test]
     fn bool_less_than_expression_bc() {
         let calc = &mut Calc::new();
