@@ -1,0 +1,11 @@
+// Run-time:
+//   env-var: RUST_LOG=debug
+//   stdout: 24
+//   stderr: 
+
+let _a = 1;
+let _b = 2;
+let _c = 3;
+let _d = 4;
+
+println(_a * _b * _c * _d);
