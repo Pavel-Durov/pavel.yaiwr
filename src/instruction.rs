@@ -45,3 +45,25 @@ pub enum Instruction {
         args: Vec<Vec<Instruction>>,
     },
 }
+
+impl Display for Instruction {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        match self {
+            Instruction::Add => f.write_str("Add"),
+            Instruction::Mul => f.write_str("Mul"),
+            Instruction::LessThan => f.write_str("LessThan"),
+            Instruction::Push { value: _ } => f.write_str("Push"),
+            Instruction::PrintLn => f.write_str("PrintLn"),
+            Instruction::Assign { id: _ } => f.write_str("Assign"),
+            Instruction::Load { id: _ } => f.write_str("Load"),
+            Instruction::Return { block: _ } => f.write_str("Return"),
+            Instruction::Function {
+                id: _,
+                params: _,
+                block: _,
+            } => f.write_str("Function"),
+            Instruction::FunctionCall { id: _, args: _ } => f.write_str("FunctionCall"),
+            Instruction::GreaterThan => f.write_str("GreaterThan"),
+        }
+    }
+}

@@ -140,21 +140,23 @@ impl Calc {
                     val = StackValue::Boolean(op2_val < op1_val);
                 } else {
                     return Err(InterpError::EvalError(
-                        format!("Unexpected booelan instruction").to_string(),
+                        format!("Unexpected boolean instruction {}", instruction).to_string(),
                     ));
                 }
                 self.stack_push(val);
                 Ok(Some(val))
             } else {
                 return Err(InterpError::EvalError(format!(
-                    "Invalid operand {} given for boolean < operation!",
-                    op1.unwrap()
+                    "Invalid operand {} given for {} operation!",
+                    op1.unwrap(),
+                    instruction
                 )));
             }
         } else {
             return Err(InterpError::EvalError(format!(
-                "Invalid operand {} given for boolean > operation!",
-                op1.unwrap()
+                "Invalid operand {} given for {} operation!",
+                op1.unwrap(),
+                instruction
             )));
         }
     }
@@ -178,21 +180,23 @@ impl Calc {
                         .ok_or(InterpError::Numeric("overflowed".to_string()))?;
                 } else {
                     return Err(InterpError::EvalError(
-                        format!("Unexpected numeric instruction").to_string(),
+                        format!("Unexpected numeric instruction {}", instruction).to_string(),
                     ));
                 }
                 self.stack_push(StackValue::Integer(val));
                 Ok(Some(StackValue::Integer(val)))
             } else {
                 return Err(InterpError::EvalError(format!(
-                    "Invalid operand {} given for mul operation!",
-                    op1.unwrap()
+                    "Invalid operand {} given numeric {} operation!",
+                    op1.unwrap(),
+                    instruction
                 )));
             }
         } else {
             return Err(InterpError::EvalError(format!(
-                "Invalid operand {} given for mul operation!",
-                op1.unwrap()
+                "Invalid operand {} given numeric {} operation!",
+                op1.unwrap(),
+                instruction
             )));
         }
     }
