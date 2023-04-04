@@ -8,7 +8,7 @@ mod tests {
     #[test]
     fn println_statement_numeric_bc() {
         let calc = &mut Calc::new();
-        let ast = calc.from_str("println(1);").unwrap();
+        let ast = calc.from_str("println(1)").unwrap();
         let bytecode = Calc::ast_to_bytecode(ast);
         match bytecode.as_slice() {
             [first, second] => {
@@ -27,7 +27,7 @@ mod tests {
     #[test]
     fn print_statement_add_bc() {
         let calc = &mut Calc::new();
-        let ast = calc.from_str("println (1+1);").unwrap();
+        let ast = calc.from_str("println (1+1)").unwrap();
         let bytecode = Calc::ast_to_bytecode(ast);
         match bytecode.as_slice() {
             [c1, c2, c3, c4] => {

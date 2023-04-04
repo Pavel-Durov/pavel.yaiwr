@@ -58,7 +58,7 @@ mod tests {
         let calc = &mut Calc::new();
         eval_prog(
             calc,
-            "fun add (_p1, _p2, _p3){ return _p1 + _p2 +_p3; }",
+            "fun add (p1, p2, p3){ return p1 + p2 +p3; }",
             scope,
         )
         .unwrap();

@@ -16,8 +16,7 @@ return "RETURN"
 ; ";"
 , ","
 = "="
-_[a-zA-Z0-9_]+ "T_VARIABLE"
-[a-zA-Z0-9_]+ "T_FUNCTION" 
+[a-zA-Z0-9_]+ "IDENTIFIER"
 [\t\n ]+ ;
 //[^\n]*?$ ;
 . "UNMATCHED"
