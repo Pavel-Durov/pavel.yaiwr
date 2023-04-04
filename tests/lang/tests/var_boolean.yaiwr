@@ -1,0 +1,6 @@
+// Run-time:
+//   stdout: false
+
+let _a = 1 > 2; 
+
+println(_a);

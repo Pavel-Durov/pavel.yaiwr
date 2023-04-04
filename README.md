@@ -88,6 +88,7 @@ Example:
 ```
 (1+2) > 3 # false
 1000 > 42 # true
+let _a = 1 > 2;
 ```
 
 
