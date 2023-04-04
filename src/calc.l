@@ -1,9 +1,10 @@
 %%
-[0-9]+ "INTEGER"
+[0-9]+ "INTEGER_LITERAL"
 println "PRINT_LN" 
 let "ASSIGN"
 fun "FUNCTION"
 return "RETURN"
+(true|false) "BOOLEAN_LITERAL"
 \+ "ADD"
 \* "MUL"
 \( "("

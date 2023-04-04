@@ -1,4 +1,4 @@
-use crate::{ast::AstNode, instruction::Instruction};
+use crate::{ast::AstNode, instruction::{Instruction, StackValue}};
 
 fn function_call(id: String, args: Vec<AstNode>, prog: &mut Vec<Instruction>) {
     let mut args_bytecode = vec![];
@@ -68,7 +68,7 @@ pub fn to_bytecode(ast_node: AstNode, prog: &mut Vec<Instruction>) {
             to_bytecode(*rhs, prog);
             prog.push(Instruction::Mul {})
         }
-        AstNode::Number { value } => prog.push(Instruction::Push { value: value }),
+        AstNode::Number { value } => prog.push(Instruction::Push { value: StackValue::Integer(value) }),
         AstNode::PrintLn { rhs } => {
             to_bytecode(*rhs, prog);
             prog.push(Instruction::PrintLn {})
@@ -78,5 +78,8 @@ pub fn to_bytecode(ast_node: AstNode, prog: &mut Vec<Instruction>) {
             prog.push(Instruction::Assign { id })
         }
         AstNode::ID { value } => prog.push(Instruction::Load { id: value }),
+        AstNode::Boolean { value } => {
+            prog.push(Instruction::Push { value: StackValue::Boolean(value) })
+        },
     }
 }

@@ -1,12 +1,12 @@
 #[cfg(test)]
 mod tests {
-    use yaiwr::{err::InterpError, instruction::Instruction, scope::Scope, Calc};
+    use yaiwr::{err::InterpError, instruction::{Instruction, StackValue}, scope::Scope, Calc};
 
     pub fn eval_prog(
         calc: &mut Calc,
         input: &str,
         scope: &mut Scope,
-    ) -> Result<Option<u64>, InterpError> {
+    ) -> Result<Option<StackValue>, InterpError> {
         let ast = calc.from_str(input).unwrap();
         let bytecode = Calc::ast_to_bytecode(ast);
         return calc.eval(&bytecode, scope);
@@ -43,7 +43,7 @@ mod tests {
         eval_prog(calc, "fun add2 (_p1){ return _p1 + 2; }", scope).unwrap();
         assert_eq!(
             eval_prog(calc, "add2(add1(1););", scope).unwrap().unwrap(),
-            4
+            StackValue::Integer(4)
         );
     }
 
@@ -57,7 +57,7 @@ mod tests {
             scope,
         )
         .unwrap();
-        assert_eq!(eval_prog(calc, "add(1,2,3);", scope).unwrap().unwrap(), 6);
+        assert_eq!(eval_prog(calc, "add(1,2,3);", scope).unwrap().unwrap(), StackValue::Integer(6));
     }
 
     #[test]
@@ -76,8 +76,8 @@ mod tests {
                         params: vec![],
                         block: vec![Instruction::Return {
                             block: vec![
-                                Instruction::Push { value: 2 },
-                                Instruction::Push { value: 2 },
+                                Instruction::Push { value: StackValue::Integer(2) },
+                                Instruction::Push { value: StackValue::Integer(2) },
                                 Instruction::Mul
                             ]
                         }]
@@ -111,7 +111,7 @@ mod tests {
                                     id: "_p2".to_string()
                                 },
                                 Instruction::Add,
-                                Instruction::Push { value: 1 },
+                                Instruction::Push { value: StackValue::Integer(1) },
                                 Instruction::Add
                             ]
                         }]
@@ -164,8 +164,8 @@ mod tests {
                     &Instruction::FunctionCall {
                         id: "add".to_string(),
                         args: vec![
-                            vec![Instruction::Push { value: 1 }],
-                            vec![Instruction::Push { value: 2 }],
+                            vec![Instruction::Push { value: StackValue::Integer(1) }],
+                            vec![Instruction::Push { value: StackValue::Integer(2) }],
                         ]
                     }
                 );
@@ -190,8 +190,8 @@ mod tests {
                         params: vec![],
                         block: vec![Instruction::Return {
                             block: vec![
-                                Instruction::Push { value: 2 },
-                                Instruction::Push { value: 2 },
+                                Instruction::Push { value: StackValue::Integer(2) },
+                                Instruction::Push { value: StackValue::Integer(2) },
                                 Instruction::Add
                             ]
                         }]

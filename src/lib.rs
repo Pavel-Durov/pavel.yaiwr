@@ -1,5 +1,5 @@
 use bytecode::block_to_bytecode;
-use instruction::Instruction;
+use instruction::{Instruction, StackValue};
 use log::debug;
 use lrlex::{lrlex_mod, DefaultLexerTypes};
 use lrpar::{lrpar_mod, LexParseError, NonStreamingLexer};
@@ -20,7 +20,7 @@ use err::InterpError;
 
 pub struct Calc {
     fun_store: HashMap<String, Instruction>,
-    stack: Vec<u64>,
+    stack: Vec<StackValue>,
 }
 
 impl Calc {
@@ -31,11 +31,11 @@ impl Calc {
         }
     }
 
-    pub fn stack_pop(&mut self) -> Result<u64, InterpError> {
+    pub fn stack_pop(&mut self) -> Result<StackValue, InterpError> {
         return Ok(self.stack.pop().ok_or(InterpError::EmptyStack)?);
     }
 
-    pub fn stack_push(&mut self, val: u64) {
+    pub fn stack_push(&mut self, val: StackValue) {
         self.stack.push(val);
     }
 
@@ -78,7 +78,7 @@ impl Calc {
         &mut self,
         args: &Vec<Vec<Instruction>>,
         scope: &mut Scope,
-    ) -> Result<Vec<u64>, InterpError> {
+    ) -> Result<Vec<StackValue>, InterpError> {
         let mut result = vec![];
         for arg_set in args {
             match self.eval(arg_set, scope) {
@@ -92,10 +92,10 @@ impl Calc {
 
     fn eval_function_call(
         &mut self,
-        args: &Vec<u64>,
+        args: &Vec<StackValue>,
         id: &String,
         outer_scope: &mut Scope,
-    ) -> Result<Option<u64>, InterpError> {
+    ) -> Result<Option<StackValue>, InterpError> {
         let function = self
             .fun_store
             .get(id)
@@ -129,7 +129,7 @@ impl Calc {
         &mut self,
         instructions: &Vec<Instruction>,
         scope: &mut Scope,
-    ) -> Result<Option<u64>, InterpError> {
+    ) -> Result<Option<StackValue>, InterpError> {
         for instruction in instructions {
             debug!("eval: {:?}. scope: {:?}", instruction, scope);
             match instruction {
@@ -172,18 +172,59 @@ impl Calc {
                     println!("{}", self.stack.pop().unwrap());
                 }
                 Instruction::Mul {} => {
-                    let val = self
-                        .stack_pop()?
-                        .checked_mul(self.stack_pop()?)
-                        .ok_or(InterpError::Numeric("overflowed".to_string()))?;
-                    self.stack_push(val);
+                    // let val = self
+                    //     .stack_pop()?
+                    //     .checked_mul(self.stack_pop()?)
+                    //     .ok_or(InterpError::Numeric("overflowed".to_string()))?;
+                    // self.stack_push(val);
+                    let op1 = self.stack_pop();
+                    if let Ok(StackValue::Integer(op1_val)) = op1 {
+                        let op2 = self.stack_pop();
+                        if let Ok(StackValue::Integer(op2_val)) = op2 {
+                            let val = op1_val
+                                .checked_mul(op2_val)
+                                .ok_or(InterpError::Numeric("overflowed".to_string()))?;
+                            self.stack_push(StackValue::Integer(val));
+                        } else {
+                            return Err(InterpError::EvalError(format!(
+                                "Invalid operand {} given for mul operation!",
+                                op1.unwrap()
+                            )));
+                        }
+                    } else {
+                        return Err(InterpError::EvalError(format!(
+                            "Invalid operand {} given for mul operation!",
+                            op1.unwrap()
+                        )));
+                    }
                 }
                 Instruction::Add {} => {
-                    let val = self
-                        .stack_pop()?
-                        .checked_add(self.stack_pop()?)
-                        .ok_or(InterpError::Numeric("overflowed".to_string()))?;
-                    self.stack_push(val);
+                    // let val = self
+                    //     .stack_pop();?
+                    //     .checked_add(self.stack_pop()?)
+                    //     .ok_or(InterpError::Numeric("overflowed".to_string()))?;
+                    // self.stack_push(val);
+
+                    let op1 = self.stack_pop();
+                    if let Ok(StackValue::Integer(op1_val)) = op1 {
+                        let op2 = self.stack_pop();
+                        if let Ok(StackValue::Integer(op2_val)) = op2 {
+                            let val = op1_val
+                                .checked_add(op2_val)
+                                .ok_or(InterpError::Numeric("overflowed".to_string()))?;
+                            self.stack_push(StackValue::Integer(val));
+                        } else {
+                            return Err(InterpError::EvalError(format!(
+                                "Invalid operand {} given for add operation!",
+                                op1.unwrap()
+                            )));
+                        }
+                    } else {
+                        return Err(InterpError::EvalError(format!(
+                            "Invalid operand {} given for add operation!",
+                            op1.unwrap()
+                        )));
+                    }
                 }
                 Instruction::Assign { id } => {
                     let val = self.stack_pop()?;

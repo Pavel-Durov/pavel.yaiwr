@@ -39,12 +39,14 @@ Id -> Result<AstNode, ()>:
         })
     };
 
-Integer -> Result<AstNode, ()>:
-    "INTEGER" { parse_number($lexer.span_str(($1.map_err(|_| ())?).span())) };
+Literal -> Result<AstNode, ()>:
+    "INTEGER_LITERAL" { parse_number($lexer.span_str(($1.map_err(|_| ())?).span())) }
+    | "BOOLEAN_LITERAL" { parse_boolean($lexer.span_str(($1.map_err(|_| ())?).span())) }
+    ;
 
 CallableExpr -> Result<AstNode, ()>:
      "(" Expr ")" { $2 }
-    | Integer { $1 }
+    | Literal { $1 }
     | FunctionCall { $1 }
     | Id { $1 }
     | Return { $1 }
@@ -121,6 +123,16 @@ fn parse_number(s: &str) -> Result<AstNode, ()> {
         Ok(n_val) => Ok(AstNode::Number{ value: n_val }),
         Err(_) => {
             eprintln!("{} cannot be represented as a u64", s);
+            Err(())
+        }
+    }
+}
+
+fn parse_boolean(s: &str) -> Result<AstNode, ()> {
+    match s.parse::<bool>() {
+        Ok(n_val) => Ok(AstNode::Boolean{ value: n_val }),
+        Err(_) => {
+            eprintln!("{} cannot be represented as a boolean", s);
             Err(())
         }
     }
