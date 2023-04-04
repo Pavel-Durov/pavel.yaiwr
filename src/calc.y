@@ -18,13 +18,13 @@ Expr -> Result<AstNode, ()>:
     ;
 
 Term -> Result<AstNode, ()>:
-      Term 'MUL' CallableExpr { Ok(AstNode::Mul{ lhs: Box::new($1?), rhs: Box::new($3?) }) }
-    | CallableExpr { $1 }
+      Term 'MUL' Factor { Ok(AstNode::Mul{ lhs: Box::new($1?), rhs: Box::new($3?) }) }
+    | Factor { $1 }
     ;
 
 
 Builtins -> Result<AstNode, ()>:
-    "PRINT_LN" "(" Expr ")" ";" { Ok(AstNode::PrintLn{ rhs: Box::new($3?) }) };
+    "PRINT_LN" Factor ";" { Ok(AstNode::PrintLn{ rhs: Box::new($2?) }) };
 
 VarAssign -> Result<AstNode, ()>:
     "ASSIGN" "IDENTIFIER" "=" Expr ";" { 
@@ -38,10 +38,10 @@ Literal -> Result<AstNode, ()>:
     | "BOOLEAN_LITERAL" { parse_boolean($lexer.span_str(($1.map_err(|_| ())?).span())) }
     ;
 
-CallableExpr -> Result<AstNode, ()>:
+Factor -> Result<AstNode, ()>:
      "(" Expr ")" { $2 }
     | Literal { $1 }
-    | Return { $1 }
+    | Return { $1 }  ";" 
     |  Id  { $1 } ";" 
     ;
 
@@ -100,7 +100,7 @@ FunctionDeclaration -> Result<AstNode, ()>:
 
 
 Return -> Result<AstNode, ()>:
-    "RETURN" Expr ";" { Ok(AstNode::Return{ block: Box::new($2?) }) };
+    "RETURN" Expr{ Ok(AstNode::Return{ block: Box::new($2?) }) };
 
 Unmatched -> ():
       "UNMATCHED" { };

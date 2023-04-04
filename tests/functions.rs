@@ -21,7 +21,7 @@ mod tests {
     fn function_call_err() {
         let calc = &mut Calc::new();
         let scope = &mut Scope::new();
-        eval_prog(calc, "fun add1 (_p1){ return _p1 + 1; }", scope).unwrap();
+        eval_prog(calc, "fun add1 (p1){ return p1 + 1; }", scope).unwrap();
         assert_eq!(
             eval_prog(calc, "add1();", scope),
             Err(InterpError::EvalError(
@@ -44,8 +44,8 @@ mod tests {
     fn function_composition() {
         let calc = &mut Calc::new();
         let scope = &mut Scope::new();
-        eval_prog(calc, "fun add1 (_p1){ return _p1 + 1; }", scope).unwrap();
-        eval_prog(calc, "fun add2 (_p1){ return _p1 + 2; }", scope).unwrap();
+        eval_prog(calc, "fun add1 (p1){ return p1; + 1; }", scope).unwrap();
+        eval_prog(calc, "fun add2 (p1){ return p1; + 2; }", scope).unwrap();
         assert_eq!(
             eval_prog(calc, "add2(add1(1););", scope).unwrap().unwrap(),
             StackValue::Integer(4)
@@ -58,7 +58,7 @@ mod tests {
         let calc = &mut Calc::new();
         eval_prog(
             calc,
-            "fun add (p1, p2, p3){ return p1 + p2 +p3; }",
+            "fun add (p1, p2, p3){ return p1 + p2 + p3; }",
             scope,
         )
         .unwrap();
@@ -139,7 +139,7 @@ mod tests {
     #[test]
     fn function_declaration_with_params_call_bc() {
         let calc = &mut Calc::new();
-        let prog_func_declaration = "fun add (_p1, _p2){ return _p1 + _p2; }";
+        let prog_func_declaration = "fun add (p1, p2){ return p1 + p2; }";
         let ast = calc.from_str(prog_func_declaration).unwrap();
         let func_declaration_bc = Calc::ast_to_bytecode(ast);
         calc.eval(&func_declaration_bc, &mut Scope::new()).unwrap();
@@ -153,10 +153,10 @@ mod tests {
                         block: vec![Instruction::Return {
                             block: vec![
                                 Instruction::Load {
-                                    id: "_p1".to_string()
+                                    id: "p1".to_string()
                                 },
                                 Instruction::Load {
-                                    id: "_p2".to_string()
+                                    id: "p2".to_string()
                                 },
                                 Instruction::BinaryOp { op: BinaryOp::Add },
                             ]

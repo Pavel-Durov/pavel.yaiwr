@@ -3,5 +3,7 @@ fun add1 (p1){
 } 
 println(add1(1););
 
-// let a = 99;
-// println(a)
+let a = 99;
+println(a;);
+
+println(1+2*3);
