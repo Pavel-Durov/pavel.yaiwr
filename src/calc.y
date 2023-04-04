@@ -3,18 +3,16 @@
 %%
 
 Statements -> Result<Vec<AstNode>, ()>:
-    Statements Expr { append($1.map_err(|_| ())?, $2.map_err(|_| ())?)  }
+    Statements Statement { append($1.map_err(|_| ())?, $2.map_err(|_| ())?)  }
   | { Ok(vec![]) }
   ;
 
-Expr -> Result<AstNode, ()>:
-    Expr "ADD" Term { Ok(AstNode::Add{ lhs: Box::new($1?), rhs: Box::new($3?) }) }
-    | Term { $1 } 
-    | Builtins { $1 }
-    | VarAssign { $1 }
+Statement -> Result<AstNode, ()>:
+    Statement "ADD" Term { Ok(AstNode::Add{ lhs: Box::new($1?), rhs: Box::new($3?) }) }
+    | Term { $1 }
     | FunctionDeclaration { $1 }
-    | Expr "LESS_THAN" Term { Ok(AstNode::LessThan{ lhs: Box::new($1?), rhs: Box::new($3?) }) }
-    | Expr "GREATER_THAN" Term { Ok(AstNode::GreaterThan{ lhs: Box::new($1?), rhs: Box::new($3?) }) }
+    | Statement "LESS_THAN" Term { Ok(AstNode::LessThan{ lhs: Box::new($1?), rhs: Box::new($3?) }) }
+    | Statement "GREATER_THAN" Term { Ok(AstNode::GreaterThan{ lhs: Box::new($1?), rhs: Box::new($3?) }) }
     ;
 
 Term -> Result<AstNode, ()>:
@@ -24,10 +22,10 @@ Term -> Result<AstNode, ()>:
 
 
 Builtins -> Result<AstNode, ()>:
-    "PRINT_LN" Factor ";" { Ok(AstNode::PrintLn{ rhs: Box::new($2?) }) };
+    "PRINT_LN" Factor { Ok(AstNode::PrintLn{ rhs: Box::new($2?) }) };
 
 VarAssign -> Result<AstNode, ()>:
-    "ASSIGN" "IDENTIFIER" "=" Expr ";" { 
+    "ASSIGN" "IDENTIFIER" "=" Statement  { 
         Ok(AstNode::Assign { 
             id: $lexer.span_str(($2.map_err(|_| ())?).span()).to_string(), rhs: Box::new($4?) 
         })
@@ -39,19 +37,21 @@ Literal -> Result<AstNode, ()>:
     ;
 
 Factor -> Result<AstNode, ()>:
-     "(" Expr ")" { $2 }
+     "(" Statement ")" { $2 }
+    | Id  { $1 } ";"
     | Literal { $1 }
-    | Return { $1 }  ";" 
-    |  Id  { $1 } ";" 
+    | Return { $1 } ";" 
+    | VarAssign { $1 } ";"
     ;
 
 ArgList -> Result<Vec<AstNode>, ()>:
-    ArgList ',' Expr { append($1.map_err(|_| ())?, $3.map_err(|_| ())?) }
-    | Expr {  Ok(vec![$1.map_err(|_| ())?]) }
+    ArgList ',' Statement { append($1.map_err(|_| ())?, $3.map_err(|_| ())?) }
+    | Statement {  Ok(vec![$1.map_err(|_| ())?]) }
     ;
 
 Id -> Result<AstNode, ()>:
-    "IDENTIFIER" { 
+    Builtins { $1 }
+    | "IDENTIFIER"  { 
         Ok(AstNode::ID { 
             value: $lexer.span_str(($1.map_err(|_| ())?).span()).to_string() 
         })
@@ -100,7 +100,7 @@ FunctionDeclaration -> Result<AstNode, ()>:
 
 
 Return -> Result<AstNode, ()>:
-    "RETURN" Expr{ Ok(AstNode::Return{ block: Box::new($2?) }) };
+    "RETURN" Statement { Ok(AstNode::Return{ block: Box::new($2?) }) };
 
 Unmatched -> ():
       "UNMATCHED" { };
