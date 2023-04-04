@@ -25,6 +25,7 @@ impl StackValue {
         }
     }
 }
+
 impl Display for StackValue {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         let a = match self {
