@@ -82,7 +82,7 @@ let _f = false;
 | Symbol |  Meaning  | Example |
 |:-----|:--------:|------:|
 | >   | Greater than | `1 > 2`|
-| <   |  Less than  a| `2 > 1`|
+| <   |  Less than  a| `2 < 1`|
 
 Example:
 ```
