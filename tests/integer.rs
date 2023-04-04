@@ -6,22 +6,16 @@ mod tests {
     };
 
     #[test]
-    fn var_assign_bc() {
+    fn integer_literal_bc() {
         let calc = &mut Calc::new();
-        let ast = calc.from_str("let _ABCDabc123 = 1984;").unwrap();
+        let ast = calc.from_str("1").unwrap();
         let bytecode = Calc::ast_to_bytecode(ast);
         match bytecode.as_slice() {
-            [first, second] => {
+            [first] => {
                 assert_eq!(
                     first,
                     &Instruction::Push {
-                        value: StackValue::Integer(1984)
-                    }
-                );
-                assert_eq!(
-                    second,
-                    &Instruction::Assign {
-                        id: "_ABCDabc123".to_string()
+                        value: StackValue::Integer(1)
                     }
                 );
             }

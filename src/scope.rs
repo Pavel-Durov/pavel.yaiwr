@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use crate::err::InterpError;
+use crate::{err::InterpError, instruction::StackValue};
 
 #[derive(Debug)]
 pub struct Scope {
-    pub var_store: HashMap<String, u64>,
+    pub var_store: HashMap<String, StackValue>,
 }
 
 impl Scope {
@@ -14,13 +14,13 @@ impl Scope {
         }
     }
 
-    pub fn get_var(&self, id: &String) -> Result<&u64, InterpError> {
+    pub fn get_var(&self, id: &String) -> Result<&StackValue, InterpError> {
         self.var_store
             .get(id)
             .ok_or(InterpError::VariableNotFound(id.to_string()))
     }
 
-    pub fn set_var(&mut self, id: String, val: u64) -> Option<u64> {
+    pub fn set_var(&mut self, id: String, val: StackValue) -> Option<StackValue> {
         self.var_store.insert(id, val)
     }
 
@@ -34,7 +34,7 @@ impl Scope {
         return scope;
     }
 
-    pub fn assign(&mut self, kv: HashMap<&String, &u64>) {
+    pub fn assign(&mut self, kv: HashMap<&String, &StackValue>) {
         for kv in kv.iter() {
             self.set_var(kv.0.to_string(), **kv.1);
         }

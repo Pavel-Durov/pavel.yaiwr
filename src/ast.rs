@@ -1,4 +1,4 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum AstNode {
     Add {
         lhs: Box<AstNode>,
@@ -10,6 +10,9 @@ pub enum AstNode {
     },
     Number {
         value: u64,
+    },
+    Boolean {
+        value: bool,
     },
     ID {
         value: String,
@@ -32,5 +35,13 @@ pub enum AstNode {
     },
     Return {
         block: Box<AstNode>,
+    },
+    GreaterThan {
+        lhs: Box<AstNode>,
+        rhs: Box<AstNode>,
+    },
+    LessThan {
+        lhs: Box<AstNode>,
+        rhs: Box<AstNode>,
     },
 }

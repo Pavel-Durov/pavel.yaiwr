@@ -3,7 +3,7 @@ use std::{
     env, fs,
     io::{self, stdout, BufRead, Write},
 };
-use yaiwr::{err::InterpError, scope::Scope, Calc};
+use yaiwr::{err::InterpError, instruction::StackValue, scope::Scope, Calc};
 
 fn main() {
     env_logger::init();
@@ -34,7 +34,7 @@ pub fn run_from_file(
     file_name: &str,
     calc: &mut Calc,
     scope: &mut Scope,
-) -> Result<Option<u64>, InterpError> {
+) -> Result<Option<StackValue>, InterpError> {
     let file_path = file_name;
     match fs::read_to_string(file_name) {
         Ok(content) => eval_statement(content.as_str(), calc, scope),
@@ -69,7 +69,7 @@ fn eval_statement(
     input: &str,
     calc: &mut Calc,
     scope: &mut Scope,
-) -> Result<Option<u64>, InterpError> {
+) -> Result<Option<StackValue>, InterpError> {
     debug!("statement: {:?}", &input);
     let ast = calc.from_str(input);
     match ast {

@@ -1,6 +1,10 @@
 #[cfg(test)]
 mod tests {
-    use yaiwr::{instruction::Instruction, scope::Scope, Calc};
+    use yaiwr::{
+        instruction::{Instruction, StackValue},
+        scope::Scope,
+        Calc,
+    };
 
     #[test]
     fn add_bc() {
@@ -9,8 +13,18 @@ mod tests {
         let bytecode = Calc::ast_to_bytecode(ast);
         match bytecode.as_slice() {
             [first, second, third] => {
-                assert_eq!(first, &Instruction::Push { value: 1 });
-                assert_eq!(second, &Instruction::Push { value: 2 });
+                assert_eq!(
+                    first,
+                    &Instruction::Push {
+                        value: StackValue::Integer(1)
+                    }
+                );
+                assert_eq!(
+                    second,
+                    &Instruction::Push {
+                        value: StackValue::Integer(2)
+                    }
+                );
                 assert_eq!(third, &Instruction::Add);
             }
             _ => panic!("expected bytecodes to be not empty!"),
