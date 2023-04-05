@@ -57,7 +57,8 @@ $ run_docker_ci_job # optional (--prune)
 ## Langugage Spec(ish)
 
 ### Types
-#### Numbets
+
+#### Numbers
 
 Integers are supported as numeric values. 
 
@@ -90,8 +91,6 @@ Example:
 1000 > 42 # true
 let _a = 1 > 2;
 ```
-
-
 ### Comments
 
 YAIWR comments can be used to explain the YAIWR code. 
