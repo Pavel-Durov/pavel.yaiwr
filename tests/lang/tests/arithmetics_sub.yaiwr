@@ -1,0 +1,5 @@
+// Run-time:
+//    stdout: -1
+//    stderr:
+
+println(1-2);

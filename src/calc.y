@@ -99,6 +99,9 @@ AdditiveExpression -> Result<AstNode, ()>:
     | AdditiveExpression 'ADD' MultiplicativeExpression { 
         Ok(AstNode::Add{ lhs: Box::new($1?), rhs: Box::new($3?) })
     }
+    // | AdditiveExpression 'MINUS' MultiplicativeExpression { 
+    //     Ok(AstNode::Sub{ lhs: Box::new($1?), rhs: Box::new($3?) })
+    // }
     ;
 
 MultiplicativeExpression -> Result<AstNode, ()>: 
@@ -146,6 +149,7 @@ PrimaryExpression -> Result<AstNode, ()>:
 
 Literals -> Result<AstNode, ()>:
     'INTEGER_LITERAL' { parse_int($lexer.span_str(($1.map_err(|_| ())?).span())) }
+    | 'MINUS' 'INTEGER_LITERAL' { parse_int($lexer.span_str(($1.map_err(|_| ())?).span())) }
     | 'BOOLEAN_LITERAL' { parse_boolean($lexer.span_str(($1.map_err(|_| ())?).span())) }
     ;
 
@@ -186,10 +190,10 @@ fn append(mut lhs: Vec<AstNode>, rhs: AstNode ) -> Result<Vec<AstNode>, ()>{
 }
 
 fn parse_int(s: &str) -> Result<AstNode, ()> {
-    match s.parse::<u64>() {
+    match s.parse::<i64>() {
         Ok(n_val) => Ok(AstNode::Number{ value: n_val }),
         Err(_) => {
-            eprintln!("{} cannot be represented as a u64", s);
+            eprintln!("{} cannot be represented as a i64", s);
             Err(())
         }
     }

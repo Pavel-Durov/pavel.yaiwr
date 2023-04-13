@@ -2,6 +2,7 @@
 [0-9]+ "INTEGER_LITERAL"
 (true|false) "BOOLEAN_LITERAL"
 \+ "ADD"
+\- "MINUS"
 \* "MUL"
 \< "LESS_THAN"
 > "GREATER_THAN"

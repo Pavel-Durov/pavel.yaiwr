@@ -7,7 +7,7 @@ use crate::err::InterpError;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum StackValue {
-    Integer(u64),
+    Integer(i64),
     Boolean(bool),
 }
 
@@ -23,7 +23,7 @@ pub enum EvalResult {
 }
 
 impl StackValue {
-    pub fn as_int(&self) -> Result<u64, InterpError> {
+    pub fn as_int(&self) -> Result<i64, InterpError> {
         match self {
             StackValue::Integer(v) => Ok(*v),
             a => Err(InterpError::EvalError(
@@ -60,6 +60,7 @@ pub enum BinaryOp {
     LessThan,
     GreaterThan,
     Add,
+    Sub,
     Mul,
     Equal,
     NotEqual,
@@ -80,6 +81,7 @@ impl Display for BinaryOp {
             BinaryOp::NotEqual => f.write_str("NotEqual"),
             BinaryOp::LogicalAnd => f.write_str("LogicalAnd"),
             BinaryOp::LogicalOr => f.write_str("LogicalOr"),
+            BinaryOp::Sub => f.write_str("Sub"),
         }
     }
 }

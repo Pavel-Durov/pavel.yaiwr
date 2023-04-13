@@ -7,6 +7,8 @@ use yaiwr::{err::InterpError, instruction::StackValue, scope::Scope, Calc};
 
 fn main() {
     env_logger::init();
+        
+    println!("{}", i64::MIN);
     let args: Vec<String> = env::args().collect();
     debug!("cli args {:?}", &args[1..]);
     let scope = &mut Scope::new();

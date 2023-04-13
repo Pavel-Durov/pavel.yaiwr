@@ -145,7 +145,15 @@ impl Calc {
                 let op1 = self.stack_pop()?.as_int()?;
                 let op2 = self.stack_pop()?.as_int()?;
                 StackValue::Integer(
-                    op1.checked_add(op2)
+                    op2.checked_add(op1)
+                        .ok_or(InterpError::Numeric("overflowed".to_string()))?,
+                )
+            }
+            BinaryOp::Sub => {
+                let op1 = self.stack_pop()?.as_int()?;
+                let op2 = self.stack_pop()?.as_int()?;
+                StackValue::Integer(
+                    op2.checked_sub(op1)
                         .ok_or(InterpError::Numeric("overflowed".to_string()))?,
                 )
             }
@@ -153,7 +161,7 @@ impl Calc {
                 let op1 = self.stack_pop()?.as_int()?;
                 let op2 = self.stack_pop()?.as_int()?;
                 StackValue::Integer(
-                    op1.checked_mul(op2)
+                    op2.checked_mul(op1)
                         .ok_or(InterpError::Numeric("overflowed".to_string()))?,
                 )
             }

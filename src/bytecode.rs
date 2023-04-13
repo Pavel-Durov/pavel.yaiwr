@@ -61,6 +61,11 @@ pub fn to_bytecode(ast_node: AstNode, prog: &mut Vec<Instruction>) {
         }
         AstNode::FunctionCall { id, args } => function_call(id, args, prog),
         AstNode::Function { id, params, block } => function_declaration(id, params, block, prog),
+        AstNode::Sub { lhs, rhs } => {
+            to_bytecode(*lhs, prog);
+            to_bytecode(*rhs, prog);
+            prog.push(Instruction::BinaryOp { op: BinaryOp::Sub })
+        }
         AstNode::Add { lhs, rhs } => {
             to_bytecode(*lhs, prog);
             to_bytecode(*rhs, prog);

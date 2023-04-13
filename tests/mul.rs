@@ -57,7 +57,7 @@ mod tests {
     #[should_panic(expected = "overflowed")]
     fn mul_overflow() {
         let calc = &mut Calc::new();
-        let input = format!("{}*{};", u64::MAX, 2);
+        let input = format!("{}*{};", i64::MAX, 2);
         let ast = calc.from_str(input.as_str()).unwrap();
         let bytecode = Calc::ast_to_bytecode(ast);
         calc.eval(&bytecode, &mut Scope::new()).unwrap();
@@ -66,7 +66,7 @@ mod tests {
     #[test]
     fn mul_no_overflow() {
         let calc = &mut Calc::new();
-        let input = format!("{}*{};", u64::MAX, 1);
+        let input = format!("{}*{};", i64::MAX, 1);
         let ast = calc.from_str(input.as_str()).unwrap();
         let bytecode = Calc::ast_to_bytecode(ast);
         calc.eval(&bytecode, &mut Scope::new()).unwrap();

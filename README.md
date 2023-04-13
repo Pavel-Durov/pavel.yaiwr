@@ -62,7 +62,7 @@ $ run_docker_ci_job # optional (--prune)
 
 Integers are supported as numeric values. 
 
-Integers are stored as whole numbers as Rust `u64` constant for the 64-bit unsigned integers.
+Integers are stored as whole numbers as Rust `i64` constant for the 64-bit signed integers.
 
 Example:
 ```

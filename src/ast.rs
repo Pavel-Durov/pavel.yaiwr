@@ -4,12 +4,16 @@ pub enum AstNode {
         lhs: Box<AstNode>,
         rhs: Box<AstNode>,
     },
+    Sub {
+        lhs: Box<AstNode>,
+        rhs: Box<AstNode>,
+    },
     Mul {
         lhs: Box<AstNode>,
         rhs: Box<AstNode>,
     },
     Number {
-        value: u64,
+        value: i64,
     },
     Boolean {
         value: bool,
