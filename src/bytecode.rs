@@ -164,5 +164,7 @@ pub fn to_bytecode(ast_node: AstNode, prog: &mut Vec<Instruction>) {
                 op: BinaryOp::LogicalOr,
             })
         }
+        AstNode::FCall { .. } => todo!(),
+        AstNode::Call => todo!(),
     }
 }

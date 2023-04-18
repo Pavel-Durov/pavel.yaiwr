@@ -69,5 +69,10 @@ pub enum AstNode {
         lhs: Box<AstNode>,
         rhs: Box<AstNode>,
     },
+    FCall {
+        id: String,
+        args: Box<AstNode>,
+    },
+    Call,
     Empty,
 }

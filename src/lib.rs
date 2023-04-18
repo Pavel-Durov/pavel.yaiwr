@@ -54,7 +54,10 @@ impl Calc {
         match ast_exp {
             Some(res) => match res {
                 Ok(exp) => Ok(exp),
-                Err(_) => Err(InterpError::ParseError(err_msg)),
+                Err(a) => {
+                    println!("{:?}", a);
+                    Err(InterpError::ParseError(err_msg))
+                },
             },
             None => Err(InterpError::ParseError(err_msg)),
         }

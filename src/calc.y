@@ -120,21 +120,38 @@ UnaryExpression -> Result<AstNode, ()>:
     PostfixExpression { $1 }
     ;
 
+PrimaryExpression -> Result<AstNode, ()>:
+    Id { $1 }
+    |  '(' Expression ')' { $2 }
+    // |  '(' ')' {  Ok(AstNode::FunctionCall{ id: "?".to_string(), args: vec![] }) }
+    | Literals { $1 }
+    ;
 
-PostfixExpression -> Result<AstNode, ()>:
-    PrimaryExpression { $1 }
-  | PostfixExpression '(' ')' { 
+
+
+// argument_list:
+// 		'(' ')'
+// 	|	'(' non_empty_argument_list possible_comma ')'
+// ;
+
+FCall -> Result<AstNode, ()>:
+    '(' ')' { Ok(AstNode::Call{ }) }
+    | '(' ArgumentExpressionList ')' { Ok(AstNode::Call{ }) }
+    ;
+
+FunctionCall -> Result<AstNode, ()>:
+  PostfixExpression FCall { 
         match $1.map_err(|_| ())? {
-            AstNode::ID { value: id } => Ok(AstNode::FunctionCall{ id, args: vec![] }),
+            AstNode::ID { value: id } => Ok(AstNode::FCall{ id, args: Box::new($2?) }),
             _ => Err(())
         }
     }
-  | PostfixExpression '(' ArgumentExpressionList ')' { 
-        match $1.map_err(|_| ())? {
-        AstNode::ID { value: id } => Ok(AstNode::FunctionCall{ id, args: $3.map_err(|_| ())? }),
-        _ => Err(())
-        }
-   }
+//   | FuncCall { $1 }
+  ;
+
+PostfixExpression -> Result<AstNode, ()>:
+    PrimaryExpression { $1 }
+  | FunctionCall { $1 }
   ;
     
 ArgumentExpressionList -> Result<Vec<AstNode>, ()>:
@@ -145,12 +162,6 @@ ArgumentExpressionList -> Result<Vec<AstNode>, ()>:
 Id -> Result<AstNode, ()>:
   'IDENTIFIER' { Ok(AstNode::ID { value: $lexer.span_str(($1.map_err(|_| ())?).span()).to_string() }) }
   ;
-
-PrimaryExpression -> Result<AstNode, ()>:
-    Id { $1 }
-    |  '(' Expression ')' { $2 }
-    | Literals { $1 }
-    ;
 
 Literals -> Result<AstNode, ()>:
     'INTEGER_LITERAL' { parse_int($lexer.span_str(($1.map_err(|_| ())?).span())) }
