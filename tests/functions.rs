@@ -35,6 +35,30 @@ mod tests {
     }
 
     #[test]
+    fn sss() {
+        let scope = Rc::new(RefCell::new(Scope::new()));
+        let yaiwr = &mut YIWR::new();
+        let result = eval_prog(yaiwr, "
+          fun f1(f2) {
+            return f2() + 1;
+          }
+          
+          fun f2() {
+            return 2;
+          }
+          
+          let result = f1(f2);
+          
+          println(result);
+        
+        ", scope.clone());
+        assert_eq!(
+            result,
+            Ok(Some(EvalResult::Value(StackValue::Integer(3))))
+        );
+    }
+
+    #[test]
     fn function_undefined_err() {
         let scope = Rc::new(RefCell::new(Scope::new()));
         let yaiwr = &mut YIWR::new();
@@ -183,8 +207,8 @@ mod tests {
         let prog_func_call = "add(1,2);";
         let ast = yaiwr.from_str(prog_func_call).unwrap();
         let func_call_bc = YIWR::ast_to_bytecode(ast);
-        let scope = Rc::new(RefCell::new(Scope::new()));
-        yaiwr.eval(&func_call_bc, scope).unwrap();
+        
+        yaiwr.eval(&func_call_bc, scope.clone()).unwrap();
         match func_call_bc.as_slice() {
             [first] => {
                 assert_eq!(

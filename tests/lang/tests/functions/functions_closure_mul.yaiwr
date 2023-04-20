@@ -2,12 +2,21 @@
 //    stdout: 4
 //    stderr:
 
-fun mul (a){
-  fun inner (a){
-    return a * a;
+fun f (char1){
+  let str = 1;
+
+  fun appendFunc(char2){
+    if (char2 != 0){
+      let result = str + char2;
+      str = 1;
+      return result;
+    } else {
+      str = str * 10;
+      return appendFunc;
+    }
   }
-  return inner;
+  return appendFunc;
 }
 
-let mul_by_2 = mul(2);
-println(mul_by_2(2));
+let f = f(0);
+println(f(1))

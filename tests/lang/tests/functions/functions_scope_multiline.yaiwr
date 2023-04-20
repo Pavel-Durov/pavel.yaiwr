@@ -2,13 +2,8 @@
 //    stdout: 1
 //    stderr:
 
-fun set_a(){ 
-    let a = 10;
+fun a (){
+    
 }
 
-fun f1(a){ 
-    set_a();
-    return a;
-}
-
-println(f1(1));
+println(1);

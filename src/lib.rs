@@ -4,7 +4,7 @@ use log::debug;
 use lrlex::{lrlex_mod, DefaultLexerTypes};
 use lrpar::{lrpar_mod, LexParseError, NonStreamingLexer};
 use scope::Scope;
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 lrlex_mod!("yaiwr.l");
 lrpar_mod!("yaiwr.y");
@@ -23,16 +23,12 @@ use hash::HashId;
 use crate::instruction::JumpInstruction;
 
 pub struct YIWR {
-    fun_store: HashMap<u64, Instruction>,
     stack: Vec<StackValue>,
 }
 
 impl YIWR {
     pub fn new() -> Self {
-        YIWR {
-            fun_store: HashMap::new(),
-            stack: vec![],
-        }
+        YIWR { stack: vec![] }
     }
 
     pub fn stack_pop(&mut self) -> Result<StackValue, InterpError> {
@@ -94,42 +90,20 @@ impl YIWR {
         return Ok(result);
     }
 
-    fn get_func(
-        &self,
-        id: &String,
-        scope: Rc<RefCell<Scope>>,
-    ) -> Result<&Instruction, InterpError> {
-        let func_id: u64 = id.id();
-        match (
-            self.fun_store.get(&func_id),
-            scope.borrow().get_var(func_id),
-        ) {
-            (Some(f), _) => Ok(f),
-            (_, Some(StackValue::Function(f_id))) => {
-                let f = self
-                    .fun_store
-                    .get(&f_id)
-                    .ok_or(InterpError::UndefinedFunction(id.to_string()))?;
-                Ok(f)
-            }
-            _ => return Err(InterpError::UndefinedFunction(id.to_string())),
-        }
-    }
-
     fn eval_function_call(
         &mut self,
         args: &Vec<EvalResult>,
-        id: &String,
+        func_name: &String,
         outer_scope: Rc<RefCell<Scope>>,
     ) -> Result<Option<EvalResult>, InterpError> {
-        match self.get_func(id, outer_scope.clone())? {
-            Instruction::Function {
+        match outer_scope.borrow().get_func(func_name.id()) {
+            Some(Instruction::Function {
                 id: _,
                 name: _,
                 params,
                 block: body,
                 scope,
-            } => {
+            }) => {
                 if params.len() != args.len() {
                     return Err(InterpError::EvalError(format!(
                         "Unexpected number of function arguments. Expected: {}, Got: {}",
@@ -153,11 +127,10 @@ impl YIWR {
                     )),
                 }
             }
-            _ => {
-                return Err(InterpError::EvalError(
-                    "Unexpected type registrated as a function!".to_string(),
-                ));
-            }
+            None => Err(InterpError::UndefinedFunction(func_name.to_string())),
+            _ => Err(InterpError::EvalError(
+                "Unexpected type registrated as a function!".to_string(),
+            )),
         }
     }
 
@@ -195,7 +168,7 @@ impl YIWR {
             }
             BinaryOp::Assign { id, name } => {
                 let val = self.stack_pop()?;
-                match scope.borrow_mut().set_var(*id, val) {
+                match scope.clone().borrow_mut().set_var(*id, val) {
                     Some(val) => Ok(val),
                     None => return Err(InterpError::UndeclaredVariable(name.to_string())),
                 }
@@ -289,26 +262,36 @@ impl YIWR {
                     name,
                     params,
                     scope: _,
-                } => match self.fun_store.get(&id) {
-                    Some(..) => {
+                } => {
+                    // let opt = scope.clone().borrow().get_func(*id);
+                    // match opt {
+                    //     Some(..) => {
+                    //         return Err(InterpError::EvalError(format!(
+                    //             "Function with the id: '{}' already defined",
+                    //             name
+                    //         )))
+                    //     }
+                    //     None => {
+
+                    //     }
+                    // }
+                    let exist = scope.borrow_mut().set_func(
+                        *id,
+                        Instruction::Function {
+                            id: *id,
+                            name: name.to_string(),
+                            params: params.to_vec(),
+                            block: body.to_vec(),
+                            scope: Some(scope.clone()),
+                        },
+                    );
+                    if let Some(_) = exist {
                         return Err(InterpError::EvalError(format!(
                             "Function with the id: '{}' already defined",
                             name
-                        )))
+                        )));
                     }
-                    None => {
-                        self.fun_store.insert(
-                            *id,
-                            Instruction::Function {
-                                id: *id,
-                                name: name.to_string(),
-                                params: params.to_vec(),
-                                block: body.to_vec(),
-                                scope: Some(scope.clone()),
-                            },
-                        );
-                    }
-                },
+                }
                 Instruction::FunctionCall { id, args } => {
                     let arg_list = self.eval_function_args(&args, scope.clone())?;
                     let res = self.eval_function_call(&arg_list, id, scope.clone())?;
@@ -320,24 +303,20 @@ impl YIWR {
                 Instruction::PrintLn => {
                     println!("{}", self.stack_pop()?);
                 }
-                Instruction::Load { id } => {
-                    let hash = id.id();
-
-                    match self.fun_store.get(&hash) {
-                        Some(..) => {
-                            self.stack_push(StackValue::Function(hash));
-                        }
-                        None => {
-                            let val = scope.borrow().get_var(id.id());
-                            match val {
-                                Some(val) => {
-                                    self.stack_push(val);
-                                }
-                                None => return Err(InterpError::VariableNotFound(id.to_string())),
+                Instruction::Load { id } => match scope.clone().borrow().get_func(id.id()) {
+                    Some(..) => {
+                        self.stack_push(StackValue::Function(id.id()));
+                    }
+                    None => {
+                        let val = scope.borrow().get_var(id.id());
+                        match val {
+                            Some(val) => {
+                                self.stack_push(val);
                             }
+                            None => return Err(InterpError::VariableNotFound(id.to_string())),
                         }
                     }
-                }
+                },
                 Instruction::BinaryOp { op } => {
                     let val = self.eval_binary_op(op, scope.clone())?;
                     self.stack_push(val);
