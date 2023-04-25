@@ -4,6 +4,10 @@ pub enum AstNode {
         lhs: Box<AstNode>,
         rhs: Box<AstNode>,
     },
+    IncrementId {
+        id: String,
+    },
+    IncrementLiteral {},
     Mul {
         lhs: Box<AstNode>,
         rhs: Box<AstNode>,

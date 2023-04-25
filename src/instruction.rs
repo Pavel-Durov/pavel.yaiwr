@@ -91,9 +91,27 @@ impl Display for BinaryOp {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+pub enum UnaryOp {
+    IncrementId { id: String },
+    IncrementLiteral {},
+}
+
+impl Display for UnaryOp {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        match self {
+            UnaryOp::IncrementId { .. } => f.write_str("Increment"),
+            UnaryOp::IncrementLiteral {} => f.write_str("IncrementLiteral"),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum Instruction {
     BinaryOp {
         op: BinaryOp,
+    },
+    UnaryOp {
+        op: UnaryOp,
     },
     Push {
         value: StackValue,
@@ -133,6 +151,7 @@ impl Display for Instruction {
             Instruction::Function { .. } => f.write_str("Function"),
             Instruction::FunctionCall { .. } => f.write_str("FunctionCall"),
             Instruction::BinaryOp { op } => f.write_str(format!("BinaryOp({})", op).as_str()),
+            Instruction::UnaryOp { op } => f.write_str(format!("UnaryOp({})", op).as_str()),
         }
     }
 }

@@ -1,5 +1,5 @@
 use bytecode::block_to_bytecode;
-use instruction::{BinaryOp, EvalResult, Instruction, StackValue};
+use instruction::{BinaryOp, EvalResult, Instruction, StackValue, UnaryOp};
 use log::debug;
 use lrlex::{lrlex_mod, DefaultLexerTypes};
 use lrpar::{lrpar_mod, LexParseError, NonStreamingLexer};
@@ -150,6 +150,44 @@ impl YIWR {
                 return Err(InterpError::EvalError(
                     "Unexpected type registrated as a function!".to_string(),
                 ));
+            }
+        }
+    }
+
+    fn eval_unary_op(
+        &mut self,
+        op: &UnaryOp,
+        scope: Rc<RefCell<Scope>>,
+    ) -> Result<StackValue, InterpError> {
+        match op {
+            UnaryOp::IncrementId { id } => {
+                let val: Option<StackValue> = scope.borrow().get_var(id.to_string());
+                match val {
+                    Some(val) => {
+                        let result = StackValue::Integer(
+                            val.as_int()?
+                                .checked_add(1)
+                                .ok_or(InterpError::Numeric("overflowed".to_string()))?,
+                        );
+                        scope
+                            .clone()
+                            .borrow_mut()
+                            .set_var(id.clone(), result.clone());
+                        Ok(result)
+                    }
+                    _ => return Err(InterpError::VariableNotFound(id.to_string())),
+                }
+            }
+            UnaryOp::IncrementLiteral {} => {
+                let val = self.stack_pop()?;
+                let result = StackValue::Integer(
+                    val.as_int()?
+                        .checked_add(1)
+                        .ok_or(InterpError::Numeric("overflowed".to_string()))?,
+                );
+                self.stack_push(result.clone());
+
+                Ok(result)
             }
         }
     }
@@ -347,6 +385,9 @@ impl YIWR {
                             break;
                         }
                     }
+                }
+                Instruction::UnaryOp { op } => {
+                    self.eval_unary_op(op, scope.clone())?;
                 }
             }
         }

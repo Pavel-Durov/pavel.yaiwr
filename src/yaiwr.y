@@ -104,7 +104,7 @@ AssignmentExpression -> Result<AstNode, ()>:
 
 AdditiveExpression -> Result<AstNode, ()>:
     MultiplicativeExpression { $1 }
-    | AdditiveExpression 'ADD' MultiplicativeExpression { 
+    | AdditiveExpression 'PLUS' MultiplicativeExpression { 
         Ok(AstNode::Add{ lhs: Box::new($1?), rhs: Box::new($3?) })
     }
     ;
@@ -118,8 +118,14 @@ MultiplicativeExpression -> Result<AstNode, ()>:
 
 UnaryExpression -> Result<AstNode, ()>: 
     PostfixExpression { $1 }
+    | UnaryExpression 'INC_OP' { 
+        match $1.map_err(|_| ())? {
+            AstNode::ID { value: id } => Ok(AstNode::IncrementId{ id }) ,
+            AstNode::Number { value: _ } => Ok(AstNode::IncrementLiteral{ }) ,
+            _ => Err(())
+        }
+    }
     ;
-
 
 PostfixExpression -> Result<AstNode, ()>:
     PrimaryExpression { $1 }

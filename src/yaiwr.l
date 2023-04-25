@@ -1,7 +1,8 @@
 %%
 [0-9]+ "INTEGER_LITERAL"
 (true|false) "BOOLEAN_LITERAL"
-\+ "ADD"
+\+ "PLUS"
+\++ "INC_OP"
 \* "MUL"
 \< "LESS_THAN"
 > "GREATER_THAN"

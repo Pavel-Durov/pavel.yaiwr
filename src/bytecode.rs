@@ -1,6 +1,6 @@
 use crate::{
     ast::AstNode,
-    instruction::{BinaryOp, Instruction, StackValue},
+    instruction::{BinaryOp, Instruction, StackValue, UnaryOp},
 };
 
 fn function_call(id: String, args: Vec<AstNode>, prog: &mut Vec<Instruction>) {
@@ -160,6 +160,16 @@ pub fn to_bytecode(ast_node: AstNode, prog: &mut Vec<Instruction>) {
             prog.push(Instruction::BinaryOp {
                 op: BinaryOp::LogicalOr,
             })
+        }
+        AstNode::IncrementId { id } => {
+            prog.push(Instruction::UnaryOp {
+                op: UnaryOp::IncrementId { id },
+            });
+        }
+        AstNode::IncrementLiteral {} => {
+            prog.push(Instruction::UnaryOp {
+                op: UnaryOp::IncrementLiteral {},
+            });
         }
     }
 }
