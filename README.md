@@ -1,12 +1,13 @@
 [![Bors enabled](https://bors.tech/images/badge_small.svg)](https://app.bors.tech/repositories/61986)
 
-# pavel.yaiwr
+# yaiwr
 
 Yet Another Interpreter Written In Rust
 
 ## CI
 
 [Buildbot](https://ci.soft-dev.org/#/builders/1)
+
 [Bors repository](https://app.bors.tech/repositories/61986)
 
 ## Usage
@@ -263,48 +264,11 @@ fun f() {
 
 # TODOs
 
-[x] Go through the calc example in the quick start guide
-
-[x] Implement a testing framework
-
-[x] Split between "compile an AST to Vec<Opcode> and then have an evaluator which takes Vec<Opcode> and executes the program"
-
-[x] Implement stack-based VM
-
-[x] Implement print statement
-
-[x] Implement variables
-
-[x] Implement functions
-
-[x] Implement conditional statements
-
-[x] Propogate all errors to top-level where the error is printed
-
-[x] Add support for custom error handling, i.e InterpError
-
-[x] Implement function scope
-
-[x] Multi-line statements support as it was intended in https://github.com/softdevteam/pavel.yaiwr/pull/17
-
-[x] Add comments support
-
-[x] Integrate lang_tester https://lib.rs/crates/lang_tester
-
-[x] Allow function calls without `;`, for example: `add1(add1(1))` instead of `add1(add1(1););`
-
-[x] Conditionals
-
-[x] Closures
-
-[x] Rename interpreter from calc to something more meaningful
-
 [ ] Compile variable names to integers
 
-[ ] Performance - non-recursive set_var and get_var scope functionality
+[ ] Implement non-recursive set_var and get_var scope functionality
 
 [ ] Benchmarking
-
 
 # Terminology
 
